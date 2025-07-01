@@ -50,11 +50,29 @@
         <div class="ingredient-entry">
             {{ subform.ingredient_id.label }} {{ subform.ingredient_id() }}
             {{ subform.amount.label }} {{ subform.amount(step="0.1", value=subform.amount.data or '0') }}
-            <button type="submit" name="remove_ingredient" value="{{ loop.index0 }}">Remove</button>
+            <button type="button" class="remove-ingredient" data-index="{{ loop.index0 }}">Remove</button>
         </div>
         {% endfor %}
     </div>
-    <button type="submit" name="add_ingredient" value="1">Add Ingredient</button>
+    <button type="button" name="add_ingredient">Add Ingredient</button>
+
+     <!-- Hidden template to clone -->
+    <template id="ingredient-template">
+    <div class="ingredient-entry">
+        <label for="ingredients-__index__-ingredient_id">Ingredient</label>
+        <select name="ingredients-__index__-ingredient_id" id="ingredients-__index__-ingredient_id">
+        {% for value, label in form.ingredients[0].ingredient_id.choices %}
+        <option value="{{ value }}">{{ label }}</option>
+        {% endfor %}
+        </select>
+
+        <label for="ingredients-__index__-amount">Amount</label>
+        <input type="number" name="ingredients-__index__-amount" id="ingredients-__index__-amount" step="0.1" value="0">
+
+        <button type="button" class="remove-ingredient">Remove</button>
+    </div>
+    </template>
+
 
     <h3>Nutrition Summary</h3>
     <table border="1" id="nutrition-table">
@@ -118,11 +136,6 @@
 
             console.log(`Entry ${index}: ingredientId=${ingredientId}, 
                 amount=${amount}, amountRaw=${amountRaw}, amountInput=${amountInput}`);
-
-            if (!ingredientId || ingredientId === '' || isNaN(amount) || amount <= 0) {
-                console.log(`Skipping entry ${index}: invalid data`);
-                return;
-            }
 
             const data = nutritionData[String(ingredientId)];
             console.log(`Data for ingredient ${ingredientId}:`, data);
@@ -189,12 +202,64 @@
         });
     }
 
-    // On page load
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded, initializing nutrition table');
-        attachNutritionListeners();
+    function addIngredientEntry() {
+    const ingredientsList = document.getElementById('ingredients-list');
+    const template = document.getElementById('ingredient-template').content.cloneNode(true);
+
+    // Count current number of ingredient entries to assign new index
+    const currentCount = ingredientsList.querySelectorAll('.ingredient-entry').length;
+
+    // Replace __index__ placeholders with currentCount
+    const htmlString = new XMLSerializer().serializeToString(template);
+    const updatedHtml = htmlString.replace(/__index__/g, currentCount);
+
+    // Create a temporary container to convert updatedHtml string back to DOM nodes
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = updatedHtml;
+
+    // Append the new entry
+    const newEntry = tempDiv.firstElementChild;
+    ingredientsList.appendChild(newEntry);
+
+    // Attach event listener to the remove button on the new entry
+    newEntry.querySelector('.remove-ingredient').addEventListener('click', (e) => {
+        e.target.closest('.ingredient-entry').remove();
         updateNutritionTable();
     });
+
+    // Attach event listeners to the new select and input
+    const select = newEntry.querySelector('select');
+    const amountInput = newEntry.querySelector('input[type="number"]');
+    if (select) select.addEventListener('change', updateNutritionTable);
+    if (amountInput) amountInput.addEventListener('input', updateNutritionTable);
+
+    updateNutritionTable();
+}
+
+    // On page load
+    document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing nutrition table');
+
+    // Attach listener to "Add Ingredient" button
+    const addBtn = document.querySelector('[name="add_ingredient"]');
+    if (addBtn) {
+        addBtn.addEventListener('click', addIngredientEntry);
+    } else {
+        console.warn('Add Ingredient button not found!');
+    }
+
+    // Attach listeners to all existing "Remove" buttons
+    document.querySelectorAll('.remove-ingredient').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.target.closest('.ingredient-entry').remove();
+            updateNutritionTable();
+        });
+    });
+
+    attachNutritionListeners();
+    updateNutritionTable();
+});
+    
 </script>
 
 {% endblock %}
