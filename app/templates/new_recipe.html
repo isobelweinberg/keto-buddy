@@ -176,7 +176,7 @@
         
         ingredientEntries.forEach((entry, index) => {
             const select = entry.querySelector('select');
-            const amountInput = entry.querySelector('input[type="number"]');
+            const amountInput = entry.querySelector('input');
             
             if (select) {
                 select.addEventListener('change', updateNutritionTable);

@@ -1,4 +1,4 @@
-- fix new recipe form 
+x fix new recipe form 
 - change authors to just be hospital/home
 - save recipes
 
