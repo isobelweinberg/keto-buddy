@@ -20,6 +20,8 @@ class Recipe(db.Model):
     total_calories = db.Column(db.Float, nullable=True)
     ratio = db.Column(db.Float, nullable=True)
     notes = db.Column(db.Text, nullable=True)
+    author = db.Column(db.String)  # new field
+    meal_type = db.Column(db.String)  # "breakfast", "main", "snack"
     
     ingredients = db.relationship('RecipeIngredient', back_populates='recipe', cascade='all, delete-orphan')
 

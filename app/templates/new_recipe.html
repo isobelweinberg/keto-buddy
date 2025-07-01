@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Create New Recipe</h2>
+
+<form method="POST" action="{{ url_for('main.new_recipe') }}">
+    {{ form.hidden_tag() }}
+
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(size=40) }}
+    </p>
+
+    <p>
+        {{ form.notes.label }}<br>
+        {{ form.notes(rows=4, cols=50) }}
+    </p>
+
+    <div class="form-group">
+  <label for="author">Author</label>
+  <input type="text" class="form-control" id="author" name="author" list="author-options">
+  <datalist id="author-options">
+    {% for author in existing_authors %}
+      <option value="{{ author }}">
+    {% endfor %}
+  </datalist>
+</div>
+
+<div class="form-group">
+  <label for="meal_type">Meal Type</label>
+  <select class="form-control" id="meal_type" name="meal_type">
+    <option value="breakfast">Breakfast</option>
+    <option value="main">Main Meal</option>
+    <option value="snack">Snack</option>
+  </select>
+</div>
+
+    <h3>Ingredients</h3>
+    <div id="ingredients-list">
+        {% for subform in form.ingredients %}
+        <div class="ingredient-entry">
+            {{ subform.ingredient_id.label }} {{ subform.ingredient_id() }}
+            {{ subform.amount.label }} {{ subform.amount(step="0.1") }}
+            <button type="button" class="remove-ingredient">Remove</button>
+        </div>
+        {% endfor %}
+    </div>
+    <button type="button" id="add-ingredient">Add Ingredient</button>
+
+    <h3>Nutrition Summary</h3>
+    <table border="1" id="nutrition-table">
+        <thead>
+            <tr>
+                <th>Ingredient</th>
+                <th>Fat (g)</th>
+                <th>Carbs (g)</th>
+                <th>Protein (g)</th>
+                <th>Calories</th>
+            </tr>
+        </thead>
+        <tbody id="nutrition-tbody"></tbody>
+        <tfoot>
+            <tr>
+                <td><strong>Totals</strong></td>
+                <td id="total-fat">0</td>
+                <td id="total-carbs">0</td>
+                <td id="total-protein">0</td>
+                <td id="total-calories">0</td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <strong>Ketogenic Ratio (Fat : (Carbs + Protein)):</strong>
+                    <span id="ketogenic-ratio">0</span>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <p>{{ form.submit() }}</p>
+</form>
+
+<script>
+    // Ingredient nutrition data passed from Flask (ingredient id -> nutrition)
+    const nutritionData = {{ nutrition_data | tojson }};
+
+    const ingredientsList = document.getElementById('ingredients-list');
+    const addBtn = document.getElementById('add-ingredient');
+
+    function createIngredientEntry(index) {
+        const div = document.createElement('div');
+        div.classList.add('ingredient-entry');
+
+        const ingredientSelect = document.createElement('select');
+        ingredientSelect.name = `ingredients-${index}-ingredient_id`;
+        ingredientSelect.id = `ingredients-${index}-ingredient_id`;
+        ingredientSelect.required = true;
+
+        // Populate options from nutritionData keys and ingredient names
+        for (const [id, data] of Object.entries(nutritionData)) {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = `ID ${id}`; // placeholder: you can pass names too if you want
+            ingredientSelect.appendChild(option);
+        }
+
+        // For nicer user experience, let's embed ingredient names in nutritionData keys
+        // Instead, better to pass ingredient names as well, so let's improve that:
+        // (This requires Flask to pass a dict with id->name and id->nutrition)
+
+        // We'll do this below after the template code
+
+        const amountInput = document.createElement('input');
+        amountInput.type = 'number';
+        amountInput.step = '0.1';
+        amountInput.name = `ingredients-${index}-amount`;
+        amountInput.id = `ingredients-${index}-amount`;
+        amountInput.required = true;
+        amountInput.value = 0;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.textContent = 'Remove';
+        removeBtn.classList.add('remove-ingredient');
+        removeBtn.onclick = () => {
+            div.remove();
+            updateNutritionTable();
+        };
+
+        div.appendChild(ingredientSelect);
+        div.appendChild(amountInput);
+        div.appendChild(removeBtn);
+
+        ingredientSelect.onchange = updateNutritionTable;
+        amountInput.oninput = updateNutritionTable;
+
+        return div;
+    }
+
+    // To make it easier, let's just enhance the server to send ingredient names as well:
+</script>
+
+<script>
+    // This script assumes your Flask passed a second dict: ingredientNames = {id: name, ...}
+
+    // We'll redefine nutritionData as:
+    // {
+    //   id: {
+    //     name: "...",
+    //     percent_fat: ...,
+    //     percent_carbs: ...,
+    //     percent_protein: ...,
+    //     total_calories: ...
+    //   }
+    // }
+
+    // So update the Python route accordingly, then update here:
+
+    // For demo, let's assume nutritionData is like above:
+
+    // Function to build dropdown options with names:
+    function buildIngredientOptions() {
+        let options = '';
+        for (const [id, data] of Object.entries(nutritionData)) {
+            let displayName = data.name;
+            if (data.source) {
+                displayName += ` (${data.source})`;
+            }
+            options += `<option value="${id}">${displayName}</option>`;
+        }
+        return options;
+    }
+
+    // Clear and rebuild ingredients list initial state:
+    function rebuildIngredientsList() {
+        ingredientsList.innerHTML = '';
+        // Add one ingredient entry by default
+        addIngredientEntry();
+    }
+
+    let ingredientCount = 0;
+    function addIngredientEntry() {
+        const entry = createIngredientEntry(ingredientCount);
+        // Add dropdown options with names
+        const select = entry.querySelector('select');
+        select.innerHTML = buildIngredientOptions();
+
+        ingredientsList.appendChild(entry);
+        ingredientCount++;
+    }
+
+    addBtn.addEventListener('click', () => {
+        addIngredientEntry();
+    });
+
+    // Remove ingredient handler delegated to parent div
+    ingredientsList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-ingredient')) {
+            e.target.parentElement.remove();
+            updateNutritionTable();
+        }
+    });
+
+    // Update nutrition table based on current ingredient entries
+    function updateNutritionTable() {
+        const tbody = document.getElementById('nutrition-tbody');
+        tbody.innerHTML = '';
+
+        let totalFat = 0, totalCarbs = 0, totalProtein = 0, totalCalories = 0;
+
+        const entries = document.querySelectorAll('.ingredient-entry');
+        entries.forEach(entry => {
+            const select = entry.querySelector('select');
+            const amountInput = entry.querySelector('input[type="number"]');
+
+            const ingredientId = select.value;
+            const amount = parseFloat(amountInput.value);
+
+            if (!ingredientId || isNaN(amount) || amount <= 0) {
+                return;
+            }
+
+            const data = nutritionData[ingredientId];
+            if (!data) return;
+
+            const fat = data.percent_fat * amount / 100;
+            const carbs = data.percent_carbs * amount / 100;
+            const protein = data.percent_protein * amount / 100;
+            const calories = data.total_calories * amount / 100;
+
+            totalFat += fat;
+            totalCarbs += carbs;
+            totalProtein += protein;
+            totalCalories += calories;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${data.name}</td>
+                <td>${fat.toFixed(2)}</td>
+                <td>${carbs.toFixed(2)}</td>
+                <td>${protein.toFixed(2)}</td>
+                <td>${calories.toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        document.getElementById('total-fat').textContent = totalFat.toFixed(2);
+        document.getElementById('total-carbs').textContent = totalCarbs.toFixed(2);
+        document.getElementById('total-protein').textContent = totalProtein.toFixed(2);
+        document.getElementById('total-calories').textContent = totalCalories.toFixed(2);
+
+        // Calculate ketogenic ratio = fat / (carbs + protein)
+        let ratio = 0;
+        if (totalCarbs + totalProtein > 0) {
+            ratio = totalFat / (totalCarbs + totalProtein);
+        }
+        document.getElementById('ketogenic-ratio').textContent = ratio.toFixed(2);
+    }
+
+    // On page load
+    rebuildIngredientsList();
+    updateNutritionTable();
+</script>
+
+{% endblock %}
