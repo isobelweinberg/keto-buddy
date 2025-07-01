@@ -6,14 +6,15 @@ from .models import Ingredient
 
 class RecipeIngredientForm(FlaskForm):
     ingredient_id = SelectField('Ingredient', coerce=int, validators=[DataRequired()])
-    amount = FloatField('Amount (g/ml)', validators=[DataRequired(), NumberRange(min=0.01)])
+    amount = FloatField('Amount (g or ml)', validators=[DataRequired(), NumberRange(min=0.01)])
 
 class RecipeForm(FlaskForm):
     name = StringField('Recipe Name', validators=[DataRequired()])
-    ratio = FloatField('Ketogenic Ratio (Fat : (Carbs + Protein))', validators=[Optional()])
+    ratio = FloatField('Ketogenic Ratio', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
     author = StringField('Author')
-    meal_type = SelectField('Meal Type', choices=[('breakfast', 'Breakfast'), ('main', 'Main Meal'), ('snack', 'Snack')])
+    meal_type = SelectField('Meal Type', 
+        choices=[('breakfast', 'Breakfast'), ('main', 'Main Meal'), ('snack', 'Snack')])
     
     ingredients = FieldList(FormField(RecipeIngredientForm), min_entries=1, max_entries=20)
     submit = SubmitField('Save Recipe')

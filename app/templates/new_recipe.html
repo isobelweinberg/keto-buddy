@@ -5,6 +5,18 @@
 <form method="POST" action="{{ url_for('main.new_recipe') }}">
     {{ form.hidden_tag() }}
 
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <ul>
+        {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+                <li>{{ field }}: {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
     <p>
         {{ form.name.label }}<br>
         {{ form.name(size=40) }}
@@ -16,35 +28,33 @@
     </p>
 
     <div class="form-group">
-  <label for="author">Author</label>
-  <input type="text" class="form-control" id="author" name="author" list="author-options">
-  <datalist id="author-options">
-    {% for author in existing_authors %}
-      <option value="{{ author }}">
-    {% endfor %}
-  </datalist>
-</div>
+      {{ form.author.label }}<br>
+      {{ form.author(class_="form-control", list="author-options") }}
+      <datalist id="author-options">
+        {% if existing_authors %}
+          {% for author in existing_authors %}
+            <option value="{{ author }}">
+          {% endfor %}
+        {% endif %}
+      </datalist>
+    </div>
 
-<div class="form-group">
-  <label for="meal_type">Meal Type</label>
-  <select class="form-control" id="meal_type" name="meal_type">
-    <option value="breakfast">Breakfast</option>
-    <option value="main">Main Meal</option>
-    <option value="snack">Snack</option>
-  </select>
-</div>
+    <div class="form-group">
+      {{ form.meal_type.label }}<br>
+      {{ form.meal_type(class_="form-control") }}
+    </div>
 
     <h3>Ingredients</h3>
     <div id="ingredients-list">
         {% for subform in form.ingredients %}
         <div class="ingredient-entry">
             {{ subform.ingredient_id.label }} {{ subform.ingredient_id() }}
-            {{ subform.amount.label }} {{ subform.amount(step="0.1") }}
-            <button type="button" class="remove-ingredient">Remove</button>
+            {{ subform.amount.label }} {{ subform.amount(step="0.1", value=subform.amount.data or '0') }}
+            <button type="submit" name="remove_ingredient" value="{{ loop.index0 }}">Remove</button>
         </div>
         {% endfor %}
     </div>
-    <button type="button" id="add-ingredient">Add Ingredient</button>
+    <button type="submit" name="add_ingredient" value="1">Add Ingredient</button>
 
     <h3>Nutrition Summary</h3>
     <table border="1" id="nutrition-table">
@@ -81,145 +91,44 @@
 <script>
     // Ingredient nutrition data passed from Flask (ingredient id -> nutrition)
     const nutritionData = {{ nutrition_data | tojson }};
+    
+    // Debug: Log nutrition data to console
+    console.log('Nutrition Data:', nutritionData);
 
-    const ingredientsList = document.getElementById('ingredients-list');
-    const addBtn = document.getElementById('add-ingredient');
-
-    function createIngredientEntry(index) {
-        const div = document.createElement('div');
-        div.classList.add('ingredient-entry');
-
-        const ingredientSelect = document.createElement('select');
-        ingredientSelect.name = `ingredients-${index}-ingredient_id`;
-        ingredientSelect.id = `ingredients-${index}-ingredient_id`;
-        ingredientSelect.required = true;
-
-        // Populate options from nutritionData keys and ingredient names
-        for (const [id, data] of Object.entries(nutritionData)) {
-            const option = document.createElement('option');
-            option.value = id;
-            option.textContent = `ID ${id}`; // placeholder: you can pass names too if you want
-            ingredientSelect.appendChild(option);
-        }
-
-        // For nicer user experience, let's embed ingredient names in nutritionData keys
-        // Instead, better to pass ingredient names as well, so let's improve that:
-        // (This requires Flask to pass a dict with id->name and id->nutrition)
-
-        // We'll do this below after the template code
-
-        const amountInput = document.createElement('input');
-        amountInput.type = 'number';
-        amountInput.step = '0.1';
-        amountInput.name = `ingredients-${index}-amount`;
-        amountInput.id = `ingredients-${index}-amount`;
-        amountInput.required = true;
-        amountInput.value = 0;
-
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.textContent = 'Remove';
-        removeBtn.classList.add('remove-ingredient');
-        removeBtn.onclick = () => {
-            div.remove();
-            updateNutritionTable();
-        };
-
-        div.appendChild(ingredientSelect);
-        div.appendChild(amountInput);
-        div.appendChild(removeBtn);
-
-        ingredientSelect.onchange = updateNutritionTable;
-        amountInput.oninput = updateNutritionTable;
-
-        return div;
-    }
-
-    // To make it easier, let's just enhance the server to send ingredient names as well:
-</script>
-
-<script>
-    // This script assumes your Flask passed a second dict: ingredientNames = {id: name, ...}
-
-    // We'll redefine nutritionData as:
-    // {
-    //   id: {
-    //     name: "...",
-    //     percent_fat: ...,
-    //     percent_carbs: ...,
-    //     percent_protein: ...,
-    //     total_calories: ...
-    //   }
-    // }
-
-    // So update the Python route accordingly, then update here:
-
-    // For demo, let's assume nutritionData is like above:
-
-    // Function to build dropdown options with names:
-    function buildIngredientOptions() {
-        let options = '';
-        for (const [id, data] of Object.entries(nutritionData)) {
-            let displayName = data.name;
-            if (data.source) {
-                displayName += ` (${data.source})`;
-            }
-            options += `<option value="${id}">${displayName}</option>`;
-        }
-        return options;
-    }
-
-    // Clear and rebuild ingredients list initial state:
-    function rebuildIngredientsList() {
-        ingredientsList.innerHTML = '';
-        // Add one ingredient entry by default
-        addIngredientEntry();
-    }
-
-    let ingredientCount = 0;
-    function addIngredientEntry() {
-        const entry = createIngredientEntry(ingredientCount);
-        // Add dropdown options with names
-        const select = entry.querySelector('select');
-        select.innerHTML = buildIngredientOptions();
-
-        ingredientsList.appendChild(entry);
-        ingredientCount++;
-    }
-
-    addBtn.addEventListener('click', () => {
-        addIngredientEntry();
-    });
-
-    // Remove ingredient handler delegated to parent div
-    ingredientsList.addEventListener('click', (e) => {
-        if (e.target.classList.contains('remove-ingredient')) {
-            e.target.parentElement.remove();
-            updateNutritionTable();
-        }
-    });
-
-    // Update nutrition table based on current ingredient entries
     function updateNutritionTable() {
+        console.log('updateNutritionTable called');
         const tbody = document.getElementById('nutrition-tbody');
         tbody.innerHTML = '';
 
         let totalFat = 0, totalCarbs = 0, totalProtein = 0, totalCalories = 0;
 
-        const entries = document.querySelectorAll('.ingredient-entry');
-        entries.forEach(entry => {
+        // Select all ingredient select and amount input fields rendered by WTForms
+        const ingredientEntries = document.querySelectorAll('.ingredient-entry');
+        console.log('Found ingredient entries:', ingredientEntries.length);
+        
+        ingredientEntries.forEach((entry, index) => {
             const select = entry.querySelector('select');
-            const amountInput = entry.querySelector('input[type="number"]');
+            const amountInput = entry.querySelector('input');
 
-            const ingredientId = select.value;
-            const amount = parseFloat(amountInput.value);
+            const ingredientId = select ? select.value : null;
+            const amountRaw = amountInput ? amountInput.value.trim() : '';
+            const amount = amountRaw === '' ? 0 : parseFloat(amountRaw);
 
-            if (!ingredientId || isNaN(amount) || amount <= 0) {
+            console.log(`Entry ${index}: ingredientId=${ingredientId}, 
+                amount=${amount}, amountRaw=${amountRaw}, amountInput=${amountInput}`);
+
+            if (!ingredientId || ingredientId === '' || isNaN(amount) || amount <= 0) {
+                console.log(`Skipping entry ${index}: invalid data`);
                 return;
             }
 
-            const data = nutritionData[ingredientId];
-            if (!data) return;
+            const data = nutritionData[String(ingredientId)];
+            console.log(`Data for ingredient ${ingredientId}:`, data);
+            
+            if (!data) {
+                console.log(`No nutrition data found for ingredient ${ingredientId}`);
+                return;
+            }
 
             const fat = data.percent_fat * amount / 100;
             const carbs = data.percent_carbs * amount / 100;
@@ -233,7 +142,7 @@
 
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${data.name}</td>
+                <td>${data.name}${data.source ? ' (' + data.source + ')' : ''}</td>
                 <td>${fat.toFixed(2)}</td>
                 <td>${carbs.toFixed(2)}</td>
                 <td>${protein.toFixed(2)}</td>
@@ -253,11 +162,36 @@
             ratio = totalFat / (totalCarbs + totalProtein);
         }
         document.getElementById('ketogenic-ratio').textContent = ratio.toFixed(2);
+        
+        console.log('Totals updated:', { totalFat, totalCarbs, totalProtein, totalCalories, ratio });
+    }
+
+    // Attach event listeners to all select and input fields on page load
+    function attachNutritionListeners() {
+        const ingredientEntries = document.querySelectorAll('.ingredient-entry');
+        console.log('Attaching listeners to', ingredientEntries.length, 'entries');
+        
+        ingredientEntries.forEach((entry, index) => {
+            const select = entry.querySelector('select');
+            const amountInput = entry.querySelector('input[type="number"]');
+            
+            if (select) {
+                select.addEventListener('change', updateNutritionTable);
+                console.log(`Attached change listener to select ${index}`);
+            }
+            if (amountInput) {
+                amountInput.addEventListener('input', updateNutritionTable);
+                console.log(`Attached input listener to amount ${index}`);
+            }
+        });
     }
 
     // On page load
-    rebuildIngredientsList();
-    updateNutritionTable();
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing nutrition table');
+        attachNutritionListeners();
+        updateNutritionTable();
+    });
 </script>
 
 {% endblock %}
