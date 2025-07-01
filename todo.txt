@@ -1,6 +1,7 @@
 x fix new recipe form 
 x page reload issue
 - change authors to just be hospital/home
+- fix or remove total grammage
 - save recipes
 
 - add in recipe viewer

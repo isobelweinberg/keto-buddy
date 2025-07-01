@@ -110,7 +110,7 @@
 
 <script>
     // Ingredient nutrition data passed from Flask (ingredient id -> nutrition)
-    const nutritionData = {{ nutrition_data | tojson }};
+    const nutritionData = JSON.parse('{{ nutrition_data | tojson | safe }}');
     
     // Debug: Log nutrition data to console
     console.log('Nutrition Data:', nutritionData);
