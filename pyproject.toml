@@ -1,0 +1,13 @@
+[project]
+name = "keto-planner"
+version = "0.1.0"
+description = "Local Flask app to plan ketogenic meals for a child with epilepsy"
+dependencies = [
+    "flask",
+    "flask-sqlalchemy",
+    "flask-wtf>=1.2.2",
+]
+requires-python = ">=3.9"
+
+[tool.uv]
+# Optional: default settings for uv

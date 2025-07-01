@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Ingredients{% endblock %}
+
+{% block content %}
+<h1>Ingredients</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Units</th>
+            <th>Fat %</th>
+            <th>Carbs %</th>
+            <th>Protein %</th>
+            <th>Calories</th>
+            <th>Source</th>  <!-- New column -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for ingredient in ingredients %}
+        <tr>
+            <td>{{ ingredient.name }}</td>
+            <td>{{ ingredient.type }}</td>
+            <td>{{ ingredient.units }}</td>
+            <td>{{ ingredient.percent_fat }}</td>
+            <td>{{ ingredient.percent_carbs }}</td>
+            <td>{{ ingredient.percent_protein }}</td>
+            <td>{{ ingredient.total_calories }}</td>
+            <td>{{ ingredient.source or '' }}</td>  <!-- Show source -->
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Add New Ingredient</h2>
+
+<form method="POST" action="{{ url_for('main.add_ingredient') }}">
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name" required>
+
+    <label for="source">Source:</label>
+    <input type="text" name="source" id="source" placeholder="e.g. Brand name or shop">
+
+    <label for="type">Type:</label>
+    <select name="type" id="type" required>
+        <option value="">Choose...</option>
+        <option value="vegetables">Vegetables</option>
+        <option value="fruit">Fruit</option>
+        <option value="nuts_seeds">Nuts and seeds</option>
+        <option value="dairy">Dairy</option>
+        <option value="fats_oils">Fats and oils</option>
+        <option value="carbohydrates">Carbohydrates</option>
+        <option value="meats_fishes">Meats and fishes</option>
+    </select>
+
+    <label>Units:</label>
+    <div>
+        <input type="radio" id="units_grams" name="units" value="g" required>
+        <label for="units_grams">Grams (g)</label>
+    </div>
+    <div>
+        <input type="radio" id="units_ml" name="units" value="ml" required>
+        <label for="units_ml">Milliliters (ml)</label>
+    </div>
+
+    <label for="percent_fat">Fat %:</label>
+    <input type="number" name="percent_fat" step="0.1" id="percent_fat" required>
+
+    <label for="percent_carbs">Carbohydrate %:</label>
+    <input type="number" name="percent_carbs" step="0.1" id="percent_carbs" required>
+
+    <label for="percent_protein">Protein %:</label>
+    <input type="number" name="percent_protein" step="0.1" id="percent_protein" required>
+
+    <label for="total_calories">Calories per 100g or ml:</label>
+    <input type="number" id="total_calories" name="total_calories" readonly>
+
+    <button type="submit">Add Ingredient</button>
+</form>
+
+<script>
+    function calculateCalories() {
+        const fat = parseFloat(document.getElementById('percent_fat').value) || 0;
+        const carbs = parseFloat(document.getElementById('percent_carbs').value) || 0;
+        const protein = parseFloat(document.getElementById('percent_protein').value) || 0;
+
+        const calories = 9 * fat + 4 * carbs + 4 * protein;
+        document.getElementById('total_calories').value = calories.toFixed(1);
+    }
+
+    // Add event listeners to recalculate calories whenever input changes
+    document.getElementById('percent_fat').addEventListener('input', calculateCalories);
+    document.getElementById('percent_carbs').addEventListener('input', calculateCalories);
+    document.getElementById('percent_protein').addEventListener('input', calculateCalories);
+
+    // Initial calculation in case form is pre-filled
+    calculateCalories();
+</script>
+
+{% endblock %}
