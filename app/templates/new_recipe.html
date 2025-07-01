@@ -61,6 +61,7 @@
         <thead>
             <tr>
                 <th>Ingredient</th>
+                <th>Amount</th>
                 <th>Fat (g)</th>
                 <th>Carbs (g)</th>
                 <th>Protein (g)</th>
@@ -71,6 +72,7 @@
         <tfoot>
             <tr>
                 <td><strong>Totals</strong></td>
+                <td id="total-amount">0</td>
                 <td id="total-fat">0</td>
                 <td id="total-carbs">0</td>
                 <td id="total-protein">0</td>
@@ -78,7 +80,7 @@
             </tr>
             <tr>
                 <td colspan="5">
-                    <strong>Ketogenic Ratio (Fat : (Carbs + Protein)):</strong>
+                    <strong>Ketogenic Ratio:</strong>
                     <span id="ketogenic-ratio">0</span>
                 </td>
             </tr>
@@ -143,10 +145,11 @@
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${data.name}${data.source ? ' (' + data.source + ')' : ''}</td>
+                <td>${amount} ${data.units}</td>
                 <td>${fat.toFixed(2)}</td>
                 <td>${carbs.toFixed(2)}</td>
                 <td>${protein.toFixed(2)}</td>
-                <td>${calories.toFixed(2)}</td>
+                <td>${calories.toFixed(0)}</td>
             `;
             tbody.appendChild(row);
         });

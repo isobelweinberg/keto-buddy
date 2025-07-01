@@ -1,0 +1,13 @@
+- fix new recipe form 
+- change authors to just be hospital/home
+- save recipes
+
+- add in recipe viewer
+- up or downvote recipes
+- add in targets
+- add in planner with shopping list export
+- ingredient swapping
+- prettify css
+- address DB secrets thing
+- readme +/- license
+- deploy

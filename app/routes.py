@@ -45,7 +45,6 @@ def add_ingredient():
 @main.route('/recipes/new', methods=['GET', 'POST'])
 def new_recipe():
     form = RecipeForm()
-    nutrition_data = {}
     form.set_ingredient_choices()
 
     # Gather nutritional info to pass to JS
@@ -53,7 +52,8 @@ def new_recipe():
     nutrition_data = {
         ing.id: {
             'name': ing.name,
-            'source': ing.source,  # Add source here
+            'source': ing.source,
+            'units': ing.units,
             'percent_fat': ing.percent_fat,
             'percent_carbs': ing.percent_carbs,
             'percent_protein': ing.percent_protein,
