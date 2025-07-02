@@ -5,10 +5,10 @@ x fix or remove total grammage
 x save recipes
 x tidy/get rid of config
 x need to add ratio to DB
-- add in recipe viewer
+x add in recipe viewer
 x fix bug where not displaying new ones
 x fix missing ratios - they are mostly null
-- fix undefined in recipes page
+x fix undefined in recipes page
 
 - up or downvote recipes
 - static database insert files

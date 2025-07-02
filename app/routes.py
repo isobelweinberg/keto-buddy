@@ -53,6 +53,7 @@ def new_recipe():
     nutrition_data = {
         ing.id: {
             'name': ing.name,
+            'units': ing.units,
             'percent_fat': ing.percent_fat,
             'percent_carbs': ing.percent_carbs,
             'percent_protein': ing.percent_protein,
