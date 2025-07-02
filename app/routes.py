@@ -65,8 +65,9 @@ def new_recipe():
         # Create recipe object
         recipe = Recipe(
             name=form.name.data,
-            notes=form.notes.data,
-            ratio=form.ratio.data
+            author=form.author.data,
+            meal_type=form.meal_type.data,
+            notes=form.notes.data
         )
 
         total_fat = total_carbs = total_protein = total_calories = 0.0
@@ -101,6 +102,7 @@ def new_recipe():
         recipe.total_carbs = total_carbs
         recipe.total_protein = total_protein
         recipe.total_calories = total_calories
+        recipe.ratio = total_fat / (total_protein + total_carbs) if (total_protein + total_carbs) > 0 else None
 
         db.session.add(recipe)
         db.session.commit()

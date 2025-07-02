@@ -6,6 +6,10 @@ x save recipes
 x tidy/get rid of config
 x need to add ratio to DB
 - add in recipe viewer
+x fix bug where not displaying new ones
+x fix missing ratios - they are mostly null
+- fix undefined in recipes page
+
 - up or downvote recipes
 - static database insert files
 - group a/b/c lookup tables or switched functionality or just simple calculator
@@ -15,5 +19,7 @@ x need to add ratio to DB
 x address DB secrets thing
 - readme +/- license
 - deploy
+- repo?
 - add in planner with shopping list export
 - ingredient swapping
+- username and password to select Sasha's account?

@@ -28,17 +28,20 @@
     </p>
 
     <div class="form-group">
-    {{ form.author.label }}<br>
-    <select name="{{ form.author.name }}" id="{{ form.author.id }}" class="form-control">
-        <option value="hospital" {% if form.author.data == 'hospital' %}selected{% endif %}>Hospital</option>
-        <option value="home" {% if form.author.data == 'home' %}selected{% endif %}>Home</option>
-    </select>
+        {{ form.author.label }}<br>
+        {{ form.author(class_="form-control") }}
     </div>
+    {% for error in form.author.errors %}
+        <div class="text-danger">{{ error }}</div>
+    {% endfor %}
 
     <div class="form-group">
       {{ form.meal_type.label }}<br>
       {{ form.meal_type(class_="form-control") }}
     </div>
+    {% for error in form.meal_type.errors %}
+        <div class="text-danger">{{ error }}</div>
+    {% endfor %}
 
     <h3>Ingredients</h3>
     <div id="ingredients-list">

@@ -24,6 +24,7 @@
                 {% for recipe in recipes %}
                 <tr class="recipe-row" data-id="{{ recipe.id }}">
                     <td><a href="#" class="toggle-details" data-id="{{ recipe.id }}">{{ recipe.name }}</a></td>
+                    <td>{{ recipe.author or '' }}</td>
                     <td>{{ recipe.total_fat | round(2) if recipe.total_fat is not none else 0 }}</td>
                     <td>{{ recipe.total_carbs | round(2) if recipe.total_carbs is not none else 0 }}</td>
                     <td>{{ recipe.total_protein | round(2) if recipe.total_protein is not none else 0 }}</td>

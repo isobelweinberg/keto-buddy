@@ -12,9 +12,17 @@ class RecipeForm(FlaskForm):
     name = StringField('Recipe Name', validators=[DataRequired()])
     ratio = FloatField('Ketogenic Ratio', validators=[Optional()])
     notes = TextAreaField('Notes', validators=[Optional()])
-    author = StringField('Author')
-    meal_type = SelectField('Meal Type', 
-        choices=[('breakfast', 'Breakfast'), ('main', 'Main Meal'), ('snack', 'Snack')])
+    author = SelectField('Author', choices=[
+        ('', '-- Select author --'),
+        ('hospital', 'Hospital'),
+        ('home', 'Home')
+    ], validators=[DataRequired(message="Please select an author.")])
+    meal_type = SelectField('Meal Type', choices=[
+        ('', '-- Select meal type --'),
+        ('breakfast', 'Breakfast'),
+        ('main', 'Main'),
+        ('snack', 'Snack')
+    ], validators=[DataRequired(message="Please select a meal type.")])
     
     ingredients = FieldList(FormField(RecipeIngredientForm), min_entries=1, max_entries=20)
     submit = SubmitField('Save Recipe')
