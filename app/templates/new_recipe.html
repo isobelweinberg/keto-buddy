@@ -116,7 +116,7 @@
         const tbody = document.getElementById('nutrition-tbody');
         tbody.innerHTML = '';
 
-        let totalFat = 0, totalCarbs = 0, totalProtein = 0, totalCalories = 0;
+        let totalAmount = 0, totalFat = 0, totalCarbs = 0, totalProtein = 0, totalCalories = 0;
 
         // Select all ingredient select and amount input fields rendered by WTForms
         const ingredientEntries = document.querySelectorAll('.ingredient-entry');
@@ -146,6 +146,7 @@
             const protein = data.percent_protein * amount / 100;
             const calories = data.total_calories * amount / 100;
 
+            totalAmount += amount;
             totalFat += fat;
             totalCarbs += carbs;
             totalProtein += protein;
@@ -163,6 +164,7 @@
             tbody.appendChild(row);
         });
 
+        document.getElementById('total-amount').textContent = totalAmount.toFixed(0);
         document.getElementById('total-fat').textContent = totalFat.toFixed(2);
         document.getElementById('total-carbs').textContent = totalCarbs.toFixed(2);
         document.getElementById('total-protein').textContent = totalProtein.toFixed(2);

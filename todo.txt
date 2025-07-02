@@ -1,9 +1,10 @@
 x fix new recipe form 
 x page reload issue
 x change authors to just be hospital/home
-- fix or remove total grammage
+x fix or remove total grammage
 x save recipes
-- tidy/get rid of config
+x tidy/get rid of config
+- need to add ratio to DB
 
 - add in recipe viewer
 - up or downvote recipes
