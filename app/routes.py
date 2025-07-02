@@ -62,26 +62,11 @@ def new_recipe():
         for ing in all_ingredients
     }
 
-    # # Handle add ingredient button
-    # if request.method == 'POST' and 'add_ingredient' in request.form:
-    #     form.ingredients.append_entry()
-    #     form.set_ingredient_choices()
-    #     return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data)
-
-    # # Handle remove ingredient button
-    # if request.method == 'POST' and 'remove_ingredient' in request.form:
-    #     idx = int(request.form['remove_ingredient'])
-    #     if len(form.ingredients.entries) > 1:
-    #         form.ingredients.entries.pop(idx)
-    #     form.set_ingredient_choices()
-    #     return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data)
-
     if form.validate_on_submit():
         # Create recipe object
         recipe = Recipe(
             name=form.name.data,
             notes=form.notes.data,
-            ratio=form.ratio.data,
             author=form.author.data,  # Save author
             meal_type=form.meal_type.data  # Save meal_type
         )
@@ -118,6 +103,7 @@ def new_recipe():
         recipe.total_carbs = total_carbs
         recipe.total_protein = total_protein
         recipe.total_calories = total_calories
+        recipe.ratio = round(total_fat / (total_protein + total_carbs), 2) if (total_protein + total_carbs) > 0 else 0
 
         db.session.add(recipe)
         db.session.commit()
