@@ -5,13 +5,15 @@ x fix or remove total grammage
 x save recipes
 x tidy/get rid of config
 x need to add ratio to DB
-
 - add in recipe viewer
 - up or downvote recipes
-- add in targets
-- add in planner with shopping list export
-- ingredient swapping
+- static database insert files
+- group a/b/c lookup tables or switched functionality or just simple calculator
+- add in targets (table with dates so can update them)
+- make secret key called in config
 - prettify css
-- address DB secrets thing
+x address DB secrets thing
 - readme +/- license
 - deploy
+- add in planner with shopping list export
+- ingredient swapping

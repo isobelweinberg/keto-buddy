@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}All Recipes{% endblock %}
+
+{% block content %}
+<h1>Recipes</h1>
+
+{% for meal_type, recipes in recipes_by_type.items() %}
+    {% if recipes %}
+        <h2>{{ meal_type.capitalize() }}s</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Author</th>
+                    <th>Fat (g)</th>
+                    <th>Carbs (g)</th>
+                    <th>Protein (g)</th>
+                    <th>Calories</th>
+                    <th>Ratio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recipe in recipes %}
+                <tr class="recipe-row" data-id="{{ recipe.id }}">
+                    <td><a href="#" class="toggle-details" data-id="{{ recipe.id }}">{{ recipe.name }}</a></td>
+                    <td>{{ recipe.total_fat | round(2) if recipe.total_fat is not none else 0 }}</td>
+                    <td>{{ recipe.total_carbs | round(2) if recipe.total_carbs is not none else 0 }}</td>
+                    <td>{{ recipe.total_protein | round(2) if recipe.total_protein is not none else 0 }}</td>
+                    <td>{{ recipe.total_calories | round(2) if recipe.total_calories is not none else 0 }}</td>
+                    <td>{{ recipe.ratio | round(2) if recipe.ratio is not none else 0 }}</td>
+                </tr>
+                <tr class="recipe-details" id="details-{{ recipe.id }}" style="display: none;">
+                    <td colspan="7">
+                        <strong>Ingredients:</strong>
+                        <ul>
+                            {% for ri in recipe.ingredients %}
+                            <li>{{ ri.amount }} {{ ri.ingredient.units }} {{ ri.ingredient.name }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% if recipe.notes %}
+                        <p><strong>Notes:</strong> {{ recipe.notes }}</p>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endfor %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggles = document.querySelectorAll('.toggle-details');
+        toggles.forEach(toggle => {
+            toggle.addEventListener('click', function (e) {
+                e.preventDefault();
+                const id = this.getAttribute('data-id');
+                const detailsRow = document.getElementById('details-' + id);
+                if (detailsRow.style.display === 'none') {
+                    detailsRow.style.display = 'table-row';
+                } else {
+                    detailsRow.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

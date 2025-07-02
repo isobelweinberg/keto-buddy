@@ -45,6 +45,7 @@ def add_ingredient():
 @main.route('/recipes/new', methods=['GET', 'POST'])
 def new_recipe():
     form = RecipeForm()
+    nutrition_data = {}
     form.set_ingredient_choices()
 
     # Gather nutritional info to pass to JS
@@ -52,8 +53,6 @@ def new_recipe():
     nutrition_data = {
         ing.id: {
             'name': ing.name,
-            'source': ing.source,
-            'units': ing.units,
             'percent_fat': ing.percent_fat,
             'percent_carbs': ing.percent_carbs,
             'percent_protein': ing.percent_protein,
@@ -67,8 +66,7 @@ def new_recipe():
         recipe = Recipe(
             name=form.name.data,
             notes=form.notes.data,
-            author=form.author.data,  # Save author
-            meal_type=form.meal_type.data  # Save meal_type
+            ratio=form.ratio.data
         )
 
         total_fat = total_carbs = total_protein = total_calories = 0.0
@@ -103,7 +101,6 @@ def new_recipe():
         recipe.total_carbs = total_carbs
         recipe.total_protein = total_protein
         recipe.total_calories = total_calories
-        recipe.ratio = round(total_fat / (total_protein + total_carbs), 2) if (total_protein + total_carbs) > 0 else 0
 
         db.session.add(recipe)
         db.session.commit()
@@ -113,7 +110,17 @@ def new_recipe():
 
     return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data)
 
-@main.route('/recipes', methods=['GET'])
+@main.route('/recipes')
 def recipes():
-    all_recipes = Recipe.query.all()
-    return render_template('recipes.html', recipes=all_recipes)
+    all_recipes = Recipe.query.order_by(Recipe.name).all()
+    
+    grouped = {
+        'breakfast': [],
+        'main': [],
+        'snack': []
+    }
+    for recipe in all_recipes:
+        if recipe.meal_type in grouped:
+            grouped[recipe.meal_type].append(recipe)
+
+    return render_template('recipes.html', recipes_by_type=grouped)
