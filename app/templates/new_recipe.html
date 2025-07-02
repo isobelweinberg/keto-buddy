@@ -28,15 +28,11 @@
     </p>
 
     <div class="form-group">
-      {{ form.author.label }}<br>
-      {{ form.author(class_="form-control", list="author-options") }}
-      <datalist id="author-options">
-        {% if existing_authors %}
-          {% for author in existing_authors %}
-            <option value="{{ author }}">
-          {% endfor %}
-        {% endif %}
-      </datalist>
+    {{ form.author.label }}<br>
+    <select name="{{ form.author.name }}" id="{{ form.author.id }}" class="form-control">
+        <option value="hospital" {% if form.author.data == 'hospital' %}selected{% endif %}>Hospital</option>
+        <option value="home" {% if form.author.data == 'home' %}selected{% endif %}>Home</option>
+    </select>
     </div>
 
     <div class="form-group">

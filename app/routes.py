@@ -62,19 +62,19 @@ def new_recipe():
         for ing in all_ingredients
     }
 
-    # Handle add ingredient button
-    if request.method == 'POST' and 'add_ingredient' in request.form:
-        form.ingredients.append_entry()
-        form.set_ingredient_choices()
-        return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data)
+    # # Handle add ingredient button
+    # if request.method == 'POST' and 'add_ingredient' in request.form:
+    #     form.ingredients.append_entry()
+    #     form.set_ingredient_choices()
+    #     return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data)
 
-    # Handle remove ingredient button
-    if request.method == 'POST' and 'remove_ingredient' in request.form:
-        idx = int(request.form['remove_ingredient'])
-        if len(form.ingredients.entries) > 1:
-            form.ingredients.entries.pop(idx)
-        form.set_ingredient_choices()
-        return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data)
+    # # Handle remove ingredient button
+    # if request.method == 'POST' and 'remove_ingredient' in request.form:
+    #     idx = int(request.form['remove_ingredient'])
+    #     if len(form.ingredients.entries) > 1:
+    #         form.ingredients.entries.pop(idx)
+    #     form.set_ingredient_choices()
+    #     return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data)
 
     if form.validate_on_submit():
         # Create recipe object
@@ -126,3 +126,8 @@ def new_recipe():
         return redirect(url_for('main.recipes'))
 
     return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data)
+
+@main.route('/recipes', methods=['GET'])
+def recipes():
+    all_recipes = Recipe.query.all()
+    return render_template('recipes.html', recipes=all_recipes)

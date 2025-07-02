@@ -1,8 +1,9 @@
 x fix new recipe form 
 x page reload issue
-- change authors to just be hospital/home
+x change authors to just be hospital/home
 - fix or remove total grammage
-- save recipes
+x save recipes
+- tidy/get rid of config
 
 - add in recipe viewer
 - up or downvote recipes
