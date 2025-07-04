@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Keto Planner{% endblock %}
+
+{% block content %}
+    <h1>Sign Up</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+          {% for category, message in messages %}
+            <li style="color: {% if category == 'danger' %}red{% elif category == 'success' %}green{% else %}black{% endif %}">
+              {{ message }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('main.signup') }}">
+        {{ form.hidden_tag() }}
+
+        <p>
+            {{ form.childsname.label }}<br>
+            {{ form.childsname(size=32) }}
+            {% if form.childsname.errors %}
+                <ul>
+                {% for error in form.childsname.errors %}
+                    <li style="color: red;">{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        </p>
+
+        <p>
+            {{ form.email.label }}<br>
+            {{ form.email(size=32) }}
+            {% if form.email.errors %}
+                <ul>
+                {% for error in form.email.errors %}
+                    <li style="color: red;">{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        </p>
+
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(size=32) }}
+            {% if form.password.errors %}
+                <ul>
+                {% for error in form.password.errors %}
+                    <li style="color: red;">{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        </p>
+
+        <p>
+            {{ form.password2.label }}<br>
+            {{ form.password2(size=32) }}
+            {% if form.password2.errors %}
+                <ul>
+                {% for error in form.password2.errors %}
+                    <li style="color: red;">{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        </p>
+
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}

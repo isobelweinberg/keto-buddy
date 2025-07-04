@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import (StringField, TextAreaField, FloatField, SelectField, FieldList, FormField, SubmitField, 
-    DecimalField, IntegerField)
-from wtforms.validators import DataRequired, NumberRange, Optional
+    DecimalField, IntegerField, PasswordField, EmailField)
+from wtforms.validators import DataRequired, NumberRange, Optional, Email, EqualTo, ValidationError
 
-from .models import Ingredient
+from .models import Ingredient, User
 
 class RecipeIngredientForm(FlaskForm):
     ingredient_id = SelectField('Ingredient', coerce=int, validators=[DataRequired()])
@@ -60,3 +60,20 @@ class TargetForm(FlaskForm):
     snack_carbs = FloatField('Snack Carbs (g)', validators=[Optional()])
 
     submit = SubmitField('Save')
+
+class LoginForm(FlaskForm):
+    childsname = StringField('Child\'s Name', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
+
+class RegistrationForm(FlaskForm):
+    childsname = StringField('Child\'s Name', validators=[DataRequired()])
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Sign Up')
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError('Email is already registered.')

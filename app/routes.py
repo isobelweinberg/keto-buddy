@@ -1,15 +1,20 @@
 from datetime import date
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_user, logout_user, login_required, current_user
 from . import db
-from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown
-from .forms import RecipeForm, TargetForm
+from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User
+from .forms import RecipeForm, TargetForm, LoginForm, RegistrationForm
 
 main = Blueprint('main', __name__)
 
+# @main.route('/')
+# def home():
+#     return redirect(url_for('main.ingredients'))
+
 @main.route('/')
-def home():
-    return redirect(url_for('main.ingredients'))
+def index():
+    return render_template('index.html', user=current_user)
 
 @main.route('/ingredients', methods=['GET'])
 def ingredients():
@@ -179,3 +184,50 @@ def targets():
     latest_target = Target.query.order_by(Target.date.desc(), Target.id.desc()).first()
 
     return render_template('targets.html', target=latest_target, form=form)
+
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        childsname = form.childsname.data
+        password = form.password.data
+        
+        user = User.query.filter_by(childsname=childsname).first()
+        if user and user.check_password(password):
+            login_user(user)
+            flash('Logged in successfully.', 'success')
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('main.index'))
+        else:
+            flash('Invalid child\'s name or password', 'danger')
+
+    return render_template('login.html', form=form)
+
+@main.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('main.index'))
+
+@main.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(
+            childsname=form.childsname.data,
+            email=form.email.data,
+        )
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Registration successful! You can now log in.', 'success')
+        return redirect(url_for('main.login'))
+
+    return render_template('signup.html', form=form)
