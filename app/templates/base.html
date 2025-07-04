@@ -8,6 +8,7 @@
 <body>
     <div class="sidebar">
         <h2>Keto Planner</h2>
+        <a href="{{ url_for('main.index') }}">Home</a>
         <a href="{{ url_for('main.ingredients') }}">Ingredients</a>
         <a href="{{ url_for('main.recipes') }}">Recipes</a>
         <a href="{{ url_for('main.new_recipe') }}">Add Recipe</a>
@@ -15,6 +16,17 @@
     </div>
 
     <div class="main">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
 </body>

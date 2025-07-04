@@ -12,7 +12,7 @@ x fix undefined in recipes page
 x add in current targets page (table with dates so can update them)
 x targets at meal level 
 - add meal/snack targets to the create recipe page
-- username and password to select Sasha's account
+x username and password to select S's account
 - group a/b/c lookup tables or switched functionality or just simple calculator
 - up or downvote recipes
 - static database insert files

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import (StringField, TextAreaField, FloatField, SelectField, FieldList, FormField, SubmitField, 
-    DecimalField, IntegerField, PasswordField, EmailField)
+    DecimalField, IntegerField, PasswordField, EmailField, RadioField)
 from wtforms.validators import DataRequired, NumberRange, Optional, Email, EqualTo, ValidationError
 
 from .models import Ingredient, User
@@ -8,6 +8,28 @@ from .models import Ingredient, User
 class RecipeIngredientForm(FlaskForm):
     ingredient_id = SelectField('Ingredient', coerce=int, validators=[DataRequired()])
     amount = FloatField('Amount (g or ml)', validators=[DataRequired(), NumberRange(min=0.01)])
+
+class IngredientForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    source = StringField('Source', validators=[Optional()])
+    type = SelectField('Type', choices=[
+        ('', 'Choose...'),
+        ('vegetables', 'Vegetables'),
+        ('fruit', 'Fruit'),
+        ('nuts_seeds', 'Nuts and seeds'),
+        ('dairy', 'Dairy'),
+        ('fats_oils', 'Fats and oils'),
+        ('carbohydrates', 'Carbohydrates'),
+        ('meats_fishes', 'Meats and fishes')
+    ], validators=[DataRequired()])
+    units = RadioField('Units', choices=[
+        ('g', 'Grams (g)'),
+        ('ml', 'Milliliters (ml)')
+    ], validators=[DataRequired()])
+    percent_fat = FloatField('Fat %', validators=[DataRequired()])
+    percent_carbs = FloatField('Carbohydrate %', validators=[DataRequired()])
+    percent_protein = FloatField('Protein %', validators=[DataRequired()])
+    total_calories = FloatField('Calories per 100g or ml', validators=[DataRequired()], render_kw={'readonly': True})
 
 class RecipeForm(FlaskForm):
     name = StringField('Recipe Name', validators=[DataRequired()])
@@ -29,7 +51,6 @@ class RecipeForm(FlaskForm):
     submit = SubmitField('Save Recipe')
     
     def set_ingredient_choices(self):
-        # This method populates the ingredient dropdowns dynamically
         ingredients = Ingredient.query.order_by(Ingredient.name).all()
         choices = [
             (ing.id, f"{ing.name} ({ing.source})" if ing.source else ing.name)

@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import db
 from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User
-from .forms import RecipeForm, TargetForm, LoginForm, RegistrationForm
+from .forms import RecipeForm, TargetForm, LoginForm, RegistrationForm, IngredientForm
 
 main = Blueprint('main', __name__)
 
@@ -17,39 +17,39 @@ def index():
     return render_template('index.html', user=current_user)
 
 @main.route('/ingredients', methods=['GET'])
+@login_required
 def ingredients():
     all_ingredients = Ingredient.query.all()
-    return render_template('ingredients.html', ingredients=all_ingredients)
+    form = IngredientForm()
+    return render_template('ingredients.html', ingredients=all_ingredients, form=form)
 
 @main.route('/ingredients', methods=['POST'])
+@login_required
 def add_ingredient():
-    name = request.form.get('name')
-    type_ = request.form.get('type')
-    units = request.form.get('units')
-    percent_fat = float(request.form.get('percent_fat', 0))
-    percent_carbs = float(request.form.get('percent_carbs', 0))
-    percent_protein = float(request.form.get('percent_protein', 0))
-    source = request.form.get('source')  # New field
-    total_calories = float(request.form.get('total_calories', 0))
-
-    new_ingredient = Ingredient(
-        name=name,
-        type=type_,
-        units=units,
-        percent_fat=percent_fat,
-        percent_carbs=percent_carbs,
-        percent_protein=percent_protein,
-        total_calories=total_calories,
-        source=source  # Set source here
-    )
-
-    db.session.add(new_ingredient)
-    db.session.commit()
-
-    flash(f'Added ingredient: {name}', 'success')
-    return redirect(url_for('main.ingredients'))
+    form = IngredientForm()
+    if form.validate_on_submit():
+        new_ingredient = Ingredient(
+            name=form.name.data,
+            type=form.type.data,
+            units=form.units.data,
+            percent_fat=form.percent_fat.data,
+            percent_carbs=form.percent_carbs.data,
+            percent_protein=form.percent_protein.data,
+            total_calories=form.total_calories.data,
+            source=form.source.data,
+            user_id=current_user.id,
+        )
+        db.session.add(new_ingredient)
+        db.session.commit()
+        flash(f'Added ingredient: {new_ingredient.name}', 'success')
+        return redirect(url_for('main.ingredients'))
+    else:
+        # On validation failure, re-render the ingredients page with errors and form data
+        all_ingredients = Ingredient.query.all()
+        return render_template('ingredients.html', ingredients=all_ingredients, form=form)
 
 @main.route('/recipes/new', methods=['GET', 'POST'])
+@login_required
 def new_recipe():
     form = RecipeForm()
     nutrition_data = {}
@@ -75,7 +75,8 @@ def new_recipe():
             name=form.name.data,
             author=form.author.data,
             meal_type=form.meal_type.data,
-            notes=form.notes.data
+            notes=form.notes.data,
+            user_id=current_user.id,
         )
 
         total_fat = total_carbs = total_protein = total_calories = 0.0
@@ -121,6 +122,7 @@ def new_recipe():
     return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data)
 
 @main.route('/recipes')
+@login_required
 def recipes():
     all_recipes = Recipe.query.order_by(Recipe.name).all()
     
@@ -136,6 +138,7 @@ def recipes():
     return render_template('recipes.html', recipes_by_type=grouped)
 
 @main.route('/targets', methods=['GET', 'POST'])
+@login_required
 def targets():
     form = TargetForm()
     if form.validate_on_submit():
@@ -147,7 +150,8 @@ def targets():
             carbs=form.carbs.data,
             num_main_meals=form.num_main_meals.data,
             num_snacks=form.num_snacks.data,
-            date=date.today()
+            date=date.today(),
+            user_id=current_user.id,
         )
         db.session.add(new_target)
         db.session.commit()
@@ -161,7 +165,8 @@ def targets():
                 protein=form.meal_protein.data or 0,
                 carbs=form.meal_carbs.data or 0,
                 date=new_target.date,
-                target_id=new_target.id
+                target_id=new_target.id,
+                user_id=current_user.id,
             )
             db.session.add(meal_breakdown)
 
@@ -174,7 +179,8 @@ def targets():
                 protein=form.snack_protein.data or 0,
                 carbs=form.snack_carbs.data or 0,
                 date=new_target.date,
-                target_id=new_target.id
+                target_id=new_target.id,
+                user_id=current_user.id,
             )
             db.session.add(snack_breakdown)
 
