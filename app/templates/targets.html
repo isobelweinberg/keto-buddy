@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Daily Targets{% endblock %}
+
+{% block content %}
+<h1>Daily Targets</h1>
+
+{% if target %}
+    <div class="target-display">
+        <p><strong>Date:</strong> {{ target.date }}</p>
+        <p><strong>Ratio:</strong> {{ target.ratio }}</p>
+        <p><strong>Calories:</strong> {{ target.calories }}</p>
+        <p><strong>Fat:</strong> {{ target.fat }}</p>
+        <p><strong>Protein:</strong> {{ target.protein }}</p>
+        <p><strong>Carbs:</strong> {{ target.carbs }}</p>
+        <p><strong>Main meals:</strong> {{ target.num_main_meals }}</p>
+        <p><strong>Snacks:</strong> {{ target.num_snacks }}</p>
+    </div>
+{% else %}
+    <p>No targets set yet.</p>
+{% endif %}
+
+{% if target.breakdowns %}
+    <h3>Breakdown</h3>
+    <ul>
+        {% for b in target.breakdowns %}
+            <li><strong>{{ b.item }}</strong>: {{ b.calories }} kcal, {{ b.fat }}f / {{ b.protein }}p / {{ b.carbs }}c</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<hr>
+
+<h2>Update Targets</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <!-- Main target inputs -->
+    <p>{{ form.ratio.label }}<br>{{ form.ratio(size=10) }}</p>
+    <p>{{ form.calories.label }}<br>{{ form.calories(size=10) }}</p>
+    <p>{{ form.fat.label }}<br>{{ form.fat(size=10) }}</p>
+    <p>{{ form.protein.label }}<br>{{ form.protein(size=10) }}</p>
+    <p>{{ form.carbs.label }}<br>{{ form.carbs(size=10) }}</p>
+    <p>{{ form.num_main_meals.label }}<br>{{ form.num_main_meals(size=10) }}</p>
+    <p>{{ form.num_snacks.label }}<br>{{ form.num_snacks(size=10) }}</p>
+
+    <hr>
+
+    <!-- Optional breakdown for Meal -->
+    <h3>Meal Breakdown (optional)</h3>
+    <p>{{ form.meal_calories.label }}<br>{{ form.meal_calories(size=10) }}</p>
+    <p>{{ form.meal_fat.label }}<br>{{ form.meal_fat(size=10) }}</p>
+    <p>{{ form.meal_protein.label }}<br>{{ form.meal_protein(size=10) }}</p>
+    <p>{{ form.meal_carbs.label }}<br>{{ form.meal_carbs(size=10) }}</p>
+
+    <!-- Optional breakdown for Snack -->
+    <h3>Snack Breakdown (optional)</h3>
+    <p>{{ form.snack_calories.label }}<br>{{ form.snack_calories(size=10) }}</p>
+    <p>{{ form.snack_fat.label }}<br>{{ form.snack_fat(size=10) }}</p>
+    <p>{{ form.snack_protein.label }}<br>{{ form.snack_protein(size=10) }}</p>
+    <p>{{ form.snack_carbs.label }}<br>{{ form.snack_carbs(size=10) }}</p>
+
+    <p>{{ form.submit() }}</p>
+</form>
+
+{% endblock %}

@@ -1,3 +1,5 @@
+from datetime import date
+
 from . import db
 
 class Ingredient(db.Model):
@@ -38,3 +40,25 @@ class RecipeIngredient(db.Model):
     
     recipe = db.relationship('Recipe', back_populates='ingredients')
     ingredient = db.relationship('Ingredient')
+
+class Target(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ratio = db.Column(db.Numeric(4, 2), nullable=False)  # up to 2 decimal places
+    calories = db.Column(db.Float, nullable=False)
+    fat = db.Column(db.Float, nullable=False)
+    protein = db.Column(db.Float, nullable=False)
+    carbs = db.Column(db.Float, nullable=False)
+    date = db.Column(db.Date, nullable=False, default=date.today)
+    num_main_meals = db.Column(db.Integer, nullable=False, default=0)
+    num_snacks = db.Column(db.Integer, nullable=False, default=0)
+    breakdowns = db.relationship('TargetBreakdown', backref='target', lazy=True)
+
+class TargetBreakdown(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    item = db.Column(db.String(20), nullable=False)  # e.g. 'Meal' or 'Snack'
+    calories = db.Column(db.Float, nullable=False)
+    fat = db.Column(db.Float, nullable=False)
+    protein = db.Column(db.Float, nullable=False)
+    carbs = db.Column(db.Float, nullable=False)
+    date = db.Column(db.Date, nullable=False, default=date.today)
+    target_id = db.Column(db.Integer, db.ForeignKey('target.id'), nullable=True)

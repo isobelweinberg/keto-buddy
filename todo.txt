@@ -9,17 +9,19 @@ x add in recipe viewer
 x fix bug where not displaying new ones
 x fix missing ratios - they are mostly null
 x fix undefined in recipes page
-
+x add in current targets page (table with dates so can update them)
+x targets at meal level 
+- add meal/snack targets to the create recipe page
+- username and password to select Sasha's account
+- group a/b/c lookup tables or switched functionality or just simple calculator
 - up or downvote recipes
 - static database insert files
-- group a/b/c lookup tables or switched functionality or just simple calculator
-- add in targets (table with dates so can update them)
 - make secret key called in config
 - prettify css
 x address DB secrets thing
-- readme +/- license
 - deploy
 - repo?
+- readme +/- license
+
 - add in planner with shopping list export
 - ingredient swapping
-- username and password to select Sasha's account?

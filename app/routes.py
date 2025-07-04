@@ -1,7 +1,9 @@
+from datetime import date
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from . import db
-from .models import Ingredient, Recipe, RecipeIngredient
-from .forms import RecipeForm
+from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown
+from .forms import RecipeForm, TargetForm
 
 main = Blueprint('main', __name__)
 
@@ -127,3 +129,53 @@ def recipes():
             grouped[recipe.meal_type].append(recipe)
 
     return render_template('recipes.html', recipes_by_type=grouped)
+
+@main.route('/targets', methods=['GET', 'POST'])
+def targets():
+    form = TargetForm()
+    if form.validate_on_submit():
+        new_target = Target(
+            ratio=form.ratio.data,
+            calories=form.calories.data,
+            fat=form.fat.data,
+            protein=form.protein.data,
+            carbs=form.carbs.data,
+            num_main_meals=form.num_main_meals.data,
+            num_snacks=form.num_snacks.data,
+            date=date.today()
+        )
+        db.session.add(new_target)
+        db.session.commit()
+
+        # Handle optional meal breakdown
+        if any([form.meal_calories.data, form.meal_fat.data, form.meal_protein.data, form.meal_carbs.data]):
+            meal_breakdown = TargetBreakdown(
+                item='Meal',
+                calories=form.meal_calories.data or 0,
+                fat=form.meal_fat.data or 0,
+                protein=form.meal_protein.data or 0,
+                carbs=form.meal_carbs.data or 0,
+                date=new_target.date,
+                target_id=new_target.id
+            )
+            db.session.add(meal_breakdown)
+
+        # Handle optional snack breakdown
+        if any([form.snack_calories.data, form.snack_fat.data, form.snack_protein.data, form.snack_carbs.data]):
+            snack_breakdown = TargetBreakdown(
+                item='Snack',
+                calories=form.snack_calories.data or 0,
+                fat=form.snack_fat.data or 0,
+                protein=form.snack_protein.data or 0,
+                carbs=form.snack_carbs.data or 0,
+                date=new_target.date,
+                target_id=new_target.id
+            )
+            db.session.add(snack_breakdown)
+
+        db.session.commit()
+        return redirect(url_for('main.targets'))
+
+    latest_target = Target.query.order_by(Target.date.desc(), Target.id.desc()).first()
+
+    return render_template('targets.html', target=latest_target, form=form)

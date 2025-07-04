@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, FloatField, SelectField, FieldList, FormField, SubmitField
+from wtforms import (StringField, TextAreaField, FloatField, SelectField, FieldList, FormField, SubmitField, 
+    DecimalField, IntegerField)
 from wtforms.validators import DataRequired, NumberRange, Optional
 
 from .models import Ingredient
@@ -36,3 +37,26 @@ class RecipeForm(FlaskForm):
         ]
         for ingredient_form in self.ingredients:
             ingredient_form.ingredient_id.choices = choices
+
+class TargetForm(FlaskForm):
+    ratio = DecimalField('Ratio', places=2, validators=[DataRequired()])
+    calories = FloatField('Calories', validators=[DataRequired()])
+    fat = FloatField('Fat (g)', validators=[DataRequired()])
+    protein = FloatField('Protein (g)', validators=[DataRequired()])
+    carbs = FloatField('Carbs (g)', validators=[DataRequired()])
+    num_main_meals = IntegerField('Number of main meals', validators=[DataRequired(), NumberRange(min=0)])
+    num_snacks = IntegerField('Number of snacks', validators=[DataRequired(), NumberRange(min=0)])
+
+    # Optional breakdown for a Meal
+    meal_calories = FloatField('Meal Calories', validators=[Optional()])
+    meal_fat = FloatField('Meal Fat (g)', validators=[Optional()])
+    meal_protein = FloatField('Meal Protein (g)', validators=[Optional()])
+    meal_carbs = FloatField('Meal Carbs (g)', validators=[Optional()])
+
+    # Optional breakdown for a Snack
+    snack_calories = FloatField('Snack Calories', validators=[Optional()])
+    snack_fat = FloatField('Snack Fat (g)', validators=[Optional()])
+    snack_protein = FloatField('Snack Protein (g)', validators=[Optional()])
+    snack_carbs = FloatField('Snack Carbs (g)', validators=[Optional()])
+
+    submit = SubmitField('Save')
