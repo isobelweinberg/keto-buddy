@@ -50,6 +50,26 @@
   {{ form.submit() }}
 </form>
 
+{% if shopping_list %}
+  <h2>Shopping List</h2>
+  <table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Ingredient</th>
+        <th>Total Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in shopping_list %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ "%.2f"|format(item.amount) }} {{ item.units }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
 <script>
 
 function handleRecipeChange(idx) {

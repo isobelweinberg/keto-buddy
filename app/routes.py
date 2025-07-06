@@ -339,11 +339,33 @@ def planner():
         db.session.commit()
         flash("Planner saved!", "success")
         return redirect(url_for('main.planner'))
+    
+    # Aggregate ingredients for all selected (non-custom) recipes in the form
+    ingredient_totals = defaultdict(float)  # key: (ingredient_name, units), value: total_amount
+
+    for idx, (d, label) in enumerate(slots):
+        fld = getattr(form, f'slot_{idx}')
+        selected_id = fld.recipe_id.data
+
+    # Only aggregate if selected recipe is valid and not custom or empty
+        if selected_id and selected_id > 0:
+            recipe = next((r for r in recipes if r.id == selected_id), None)
+            if recipe:
+                for ri in recipe.ingredients:
+                    key = (ri.ingredient.name, ri.ingredient.units)
+                    ingredient_totals[key] += ri.amount
+
+    # Prepare a sorted list of ingredients for easier display
+    shopping_list = sorted(
+        [{'name': name, 'units': units, 'amount': amount} for (name, units), amount in ingredient_totals.items()],
+        key=lambda x: x['name'].lower()
+    )
 
     return render_template('planner.html',
                            form=form,
                            slots=slots,
                            slots_by_day=slots_by_day,
                            recipe_map={r.id: r for r in recipes},
-                           slot_index_map=slot_index_map)
+                           slot_index_map=slot_index_map,
+                           shopping_list=shopping_list,)
 
