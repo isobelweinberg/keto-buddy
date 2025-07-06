@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Log Meals{% endblock %}
+
+{% block content %}
+<h1>10‑Day Meal Log</h1>
+<form method="post">
+  {{ form.csrf_token }}
+
+  {% for date, slot_names in slots_by_day %}
+    <h2>{{ date.strftime('%A %d/%m/%Y') }}</h2>
+    <table>
+      <tr>
+        <th>Meal</th>
+        <th>Recipe</th>
+        <th>% Eaten</th>
+        <th>Notes</th>
+      </tr>
+      {% for slot in slot_names %}
+        {% set idx = slot_index_map[(date, slot)] %}
+        {% set fld = form['slot_' ~ idx] %}
+        <tr>
+          <td>{{ slot }}</td>
+          <td>
+            <select name="{{ fld.recipe_id.name }}" id="recipe_{{ idx }}" onchange="handleRecipeChange({{ idx }});">
+              {% for val, label in fld.recipe_id.choices %}
+                <option value="{{ val }}" {% if fld.recipe_id.data == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <br />
+            <input type="text" name="{{ fld.free_text.name }}" id="custom_{{ idx }}" size="20"
+                   value="{{ fld.free_text.data or '' }}"
+                   style="display: {% if fld.recipe_id.data == -1 %}inline{% else %}none{% endif %}; margin-top: 4px;" />
+          </td>
+          <td>
+            {{ fld.percent_eaten(size=4, min=0, max=100, step=1) }} %
+          </td>
+          <td>
+            {{ fld.notes(rows=2, cols=30) }}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endfor %}
+
+  {{ form.submit() }}
+</form>
+
+<script>
+function handleRecipeChange(idx) {
+  const dropdown = document.getElementById('recipe_' + idx);
+  const customInput = document.getElementById('custom_' + idx);
+  if (dropdown.value === '-1') {
+    customInput.style.display = 'inline';
+  } else {
+    customInput.style.display = 'none';
+    customInput.value = '';
+  }
+}
+</script>
+{% endblock %}

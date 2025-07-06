@@ -4,8 +4,10 @@ from collections import defaultdict
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import db
-from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User, PlannerEntry
-from .forms import RecipeForm, TargetForm, LoginForm, RegistrationForm, IngredientForm, PlannerForm, PlannerSlotForm
+from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User, PlannerEntry, LogEntry
+from .forms import(
+    RecipeForm, TargetForm, LoginForm, RegistrationForm, IngredientForm, PlannerForm, PlannerSlotForm, 
+    LogForm, LogSlotForm)
 
 main = Blueprint('main', __name__)
 
@@ -369,3 +371,141 @@ def planner():
                            slot_index_map=slot_index_map,
                            shopping_list=shopping_list,)
 
+@main.route('/log', methods=['GET', 'POST'])
+@login_required
+def log():
+    today = date.today()
+    days = [today + timedelta(days=i) for i in range(10)]
+
+    # Fetch latest targets
+    tgt = Target.query.filter_by(user_id=current_user.id).order_by(Target.date.desc()).first()
+    if not tgt:
+        flash("Please set your daily targets first.", "warning")
+        return redirect(url_for('main.targets'))
+
+    # Compute slots
+    slots = []
+    for d in days:
+        for m in range(1, tgt.num_main_meals + 1):
+            label = {1:'Breakfast', 2:'Lunch', 3:'Dinner'}.get(m, f'Meal {m}')
+            slots.append((d, label))
+        for s in range(1, tgt.num_snacks + 1):
+            slots.append((d, f'Snack {s}'))
+
+    grouped_slots = defaultdict(list)
+    for d, label in slots:
+        grouped_slots[d].append(label)
+    slots_by_day = sorted(grouped_slots.items())
+
+    slot_index_map = {key: idx for idx, key in enumerate(slots)}
+
+    # Fetch user's recipes for dropdown choices
+    recipes = Recipe.query.filter_by(user_id=current_user.id).all()
+    recipe_choices = [(0, '-- Select --')] + [(r.id, r.name) for r in recipes] + [(-1, 'CUSTOM')]
+
+    # Fetch existing LogEntry for these days
+    existing = LogEntry.query.filter(
+        LogEntry.user_id == current_user.id,
+        LogEntry.date.in_(days)
+    ).all()
+    existing_map = {(e.date, e.slot): e for e in existing}
+
+    # Helper: get latest PlannerEntry for user, slot, and date or before
+    def get_latest_planner_entry(user_id, date_, slot):
+        return PlannerEntry.query.filter(
+            PlannerEntry.user_id == user_id,
+            PlannerEntry.slot == slot,
+            PlannerEntry.date <= date_
+        ).order_by(PlannerEntry.date.desc()).first()
+
+    form = LogForm()
+    formdata = request.form if request.method == 'POST' else None
+
+    # Dynamically create subforms with initial data or posted data
+    for idx, (d, label) in enumerate(slots):
+        prefix = f'slot-{idx}'
+        data = {}
+
+        key = (d, label)
+        if key in existing_map:
+            e = existing_map[key]
+            if e.recipe_id:
+                data['recipe_id'] = e.recipe_id
+                data['free_text'] = ''
+            elif e.free_text:
+                data['recipe_id'] = -1
+                data['free_text'] = e.free_text
+            else:
+                data['recipe_id'] = 0
+                data['free_text'] = ''
+            data['percent_eaten'] = e.percent_eaten if e.percent_eaten is not None else 100
+            data['notes'] = e.notes or ''
+        else:
+            planner_entry = get_latest_planner_entry(current_user.id, d, label)
+            if planner_entry:
+                if planner_entry.recipe_id:
+                    data['recipe_id'] = planner_entry.recipe_id
+                    data['free_text'] = ''
+                elif planner_entry.free_text:
+                    data['recipe_id'] = -1
+                    data['free_text'] = planner_entry.free_text
+                else:
+                    data['recipe_id'] = 0
+                    data['free_text'] = ''
+            else:
+                data['recipe_id'] = 0
+                data['free_text'] = ''
+            data['percent_eaten'] = 100
+            data['notes'] = ''
+
+        subform = LogSlotForm(formdata=formdata, prefix=prefix, data=data)
+        subform.recipe_id.choices = recipe_choices
+        setattr(form, f'slot_{idx}', subform)
+
+    if form.validate_on_submit():
+        for idx, (d, label) in enumerate(slots):
+            fld = getattr(form, f'slot_{idx}')
+            selected_id = fld.recipe_id.data
+            key = (d, label)
+
+            if selected_id == -1:
+                r_id = None
+                text = fld.free_text.data.strip() if fld.free_text.data else None
+            elif selected_id and selected_id > 0:
+                r_id = selected_id
+                text = None
+            else:
+                r_id = None
+                text = None
+
+            percent = fld.percent_eaten.data if fld.percent_eaten.data is not None else 100
+            notes = fld.notes.data.strip() if fld.notes.data else None
+
+            entry = existing_map.get(key)
+            if entry:
+                entry.recipe_id = r_id
+                entry.free_text = text
+                entry.percent_eaten = percent
+                entry.notes = notes
+            else:
+                entry = LogEntry(
+                    user_id=current_user.id,
+                    date=d,
+                    slot=label,
+                    recipe_id=r_id,
+                    free_text=text,
+                    percent_eaten=percent,
+                    notes=notes
+                )
+                db.session.add(entry)
+
+        db.session.commit()
+        flash("Log saved!", "success")
+        return redirect(url_for('main.log'))
+
+    return render_template('log.html',
+                           form=form,
+                           slots=slots,
+                           slots_by_day=slots_by_day,
+                           recipe_map={r.id: r for r in recipes},
+                           slot_index_map=slot_index_map)

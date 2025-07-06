@@ -105,3 +105,13 @@ class PlannerSlotForm(FlaskForm):
 
 class PlannerForm(FlaskForm):
     submit = SubmitField('Save Planner')
+
+class LogSlotForm(FlaskForm):
+    recipe_id = SelectField('Recipe', coerce=int)
+    free_text = StringField('Custom meal')
+    percent_eaten = FloatField('% eaten', default=100)
+    notes = TextAreaField('Notes', render_kw={"rows":2, "cols":30})
+
+class LogForm(FlaskForm):
+    submit = SubmitField('Save Log')
+    # slot_N will be added dynamically in the view

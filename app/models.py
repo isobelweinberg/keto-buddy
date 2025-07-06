@@ -90,3 +90,14 @@ class PlannerEntry(db.Model):
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=True)
     free_text = db.Column(db.String(200), nullable=True)
     recipe = db.relationship('Recipe')
+
+class LogEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    slot = db.Column(db.String(20), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=True)
+    free_text = db.Column(db.String(200), nullable=True)  # custom meal text
+    percent_eaten = db.Column(db.Float, nullable=True)   # 0-100%
+    notes = db.Column(db.Text, nullable=True)
+    recipe = db.relationship('Recipe')

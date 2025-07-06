@@ -24,6 +24,6 @@ x address DB secrets thing
 - repo?
 - readme +/- license
 
-- add in planner with shopping list export
+x add in planner with shopping list export
 - ingredient swapping
 - record keeping - percentage eaten, ketones
