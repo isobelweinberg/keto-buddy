@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from collections import defaultdict
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
@@ -258,6 +259,13 @@ def planner():
             slots.append((d, label))
         for s in range(1, tgt.num_snacks + 1):
             slots.append((d, f'Snack {s}'))
+    
+    grouped_slots = defaultdict(list)
+    for d, label in slots:
+        grouped_slots[d].append(label)
+
+    # Convert to sorted list of (date, [slot1, slot2, ...]) tuples
+    slots_by_day = sorted(grouped_slots.items())
 
     # fetch recipes for dropdown
     recipes = Recipe.query.filter_by(user_id=current_user.id).all()
@@ -320,4 +328,5 @@ def planner():
         flash("Planner saved!", "success")
         return redirect(url_for('main.planner'))
 
-    return render_template('planner.html', form=form, slots=slots, recipe_map={r.id:r for r in recipes})
+    return render_template('planner.html', 
+        form=form, slots=slots, slots_by_day=slots_by_day, recipe_map={r.id:r for r in recipes})

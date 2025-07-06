@@ -5,51 +5,56 @@
 <h1>10‑Day Planner</h1>
 <form method="post">
   {{ form.csrf_token }}
-  <table>
-    <tr><th>Date</th><th>Slot</th><th>Recipe</th><th>Custom</th><th>Ingredients</th></tr>
-
-    {% for slot in slots %}
-      {% set idx = loop.index0 %}
-      {% set fld = form['slot_' ~ idx] %}
+  {% set idx = 0 %}
+  {% for date, slot_names in slots_by_day %}
+    <h2>{{ date.strftime('%A %d/%m/%Y') }}</h2>
+    <table>
       <tr>
-        <td>{{ slot[0].strftime('%Y-%m-%d') }}</td>
-        <td>{{ slot[1] }}</td>
-        
-        <!-- Recipe dropdown with 'CUSTOM' option -->
-        <td>
-          <select name="{{ fld.recipe_id.name }}" id="recipe_{{ idx }}" onchange="handleRecipeChange({{ idx }});">
-            <!-- <option value="0">-- Select --</option> -->
-            {% for val, label in fld.recipe_id.choices %}
-              <option value="{{ val }}" {% if fld.recipe_id.data == val %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-            <!-- <option value="-1" {% if fld.recipe_id.data == -1 %}selected{% endif %}>CUSTOM</option> -->
-          </select>
-        </td>
-
-        <!-- Custom recipe name input, hidden by default unless 'CUSTOM' is selected -->
-        <td>
-          <input type="text" name="{{ fld.free_text.name }}" id="custom_{{ idx }}" size="20"
-                 value="{{ fld.free_text.data or '' }}"
-                 style="display: {% if fld.recipe_id.data == -1 %}inline{% else %}none{% endif %};" />
-        </td>
-
-        <!-- Ingredients view -->
-        <td>
-          {% if fld.recipe_id.data and fld.recipe_id.data != 0 and fld.recipe_id.data != -1 %}
-            {% set r = recipe_map[fld.recipe_id.data] %}
-            <a href="#" onclick="toggleIngredients(this);return false;">View</a>
-            <div class="ingredients" style="display:none;">
-              <ul>
-                {% for ing in r.ingredients %}
-                  <li>{{ ing.ingredient.name }}: {{ ing.amount }}{{ ing.ingredient.units }}</li>
-                {% endfor %}
-              </ul>
-            </div>
-          {% endif %}
-        </td>
+        <th>Meal</th>
+        <th>Recipe</th>
+        <th>Custom</th>
+        <th>Ingredients</th>
       </tr>
-    {% endfor %}
-  </table>
+      {% for slot in slot_names %}
+        {% set fld = form['slot_' ~ idx] %}
+        <tr>
+          <td>{{ slot }}</td>
+
+          <!-- Recipe dropdown -->
+          <td>
+            <select name="{{ fld.recipe_id.name }}" id="recipe_{{ idx }}" onchange="handleRecipeChange({{ idx }});">
+              {% for val, label in fld.recipe_id.choices %}
+                <option value="{{ val }}" {% if fld.recipe_id.data == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </td>
+
+          <!-- Custom name input -->
+          <td>
+            <input type="text" name="{{ fld.free_text.name }}" id="custom_{{ idx }}" size="20"
+                   value="{{ fld.free_text.data or '' }}"
+                   style="display: {% if fld.recipe_id.data == -1 %}inline{% else %}none{% endif %};" />
+          </td>
+
+          <!-- Ingredients viewer -->
+          <td>
+            {% if fld.recipe_id.data and fld.recipe_id.data != 0 and fld.recipe_id.data != -1 %}
+              {% set r = recipe_map[fld.recipe_id.data] %}
+              <a href="#" onclick="toggleIngredients(this); return false;">View</a>
+              <div class="ingredients" style="display:none;">
+                <ul>
+                  {% for ing in r.ingredients %}
+                    <li>{{ ing.ingredient.name }}: {{ ing.amount }}{{ ing.ingredient.units }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% set idx = idx + 1 %}
+      {% endfor %}
+    </table>
+  {% endfor %}
 
   {{ form.submit() }}
 </form>
