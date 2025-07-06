@@ -239,61 +239,76 @@ def signup():
 
     return render_template('signup.html', form=form)
 
-@main.route('/planner', methods=['GET','POST'])
+@main.route('/planner', methods=['GET', 'POST'])
 @login_required
 def planner():
     today = date.today()
     days = [today + timedelta(days=i) for i in range(10)]
 
-    # latest targets
+    # Latest targets
     tgt = Target.query.filter_by(user_id=current_user.id).order_by(Target.date.desc()).first()
     if not tgt:
         flash("Please set your daily targets first.", "warning")
         return redirect(url_for('main.targets'))
 
-    # compute slots per day
+    # Compute slots
     slots = []
     for d in days:
         for m in range(1, tgt.num_main_meals + 1):
-            label = {1:'Breakfast',2:'Lunch',3:'Dinner'}.get(m, f'Meal {m}')
+            label = {1:'Breakfast', 2:'Lunch', 3:'Dinner'}.get(m, f'Meal {m}')
             slots.append((d, label))
         for s in range(1, tgt.num_snacks + 1):
             slots.append((d, f'Snack {s}'))
-    
+
     grouped_slots = defaultdict(list)
     for d, label in slots:
         grouped_slots[d].append(label)
-
-    # Convert to sorted list of (date, [slot1, slot2, ...]) tuples
     slots_by_day = sorted(grouped_slots.items())
 
-    # fetch recipes for dropdown
-    recipes = Recipe.query.filter_by(user_id=current_user.id).all()
-    recipe_choices = [ (0, '-- Select --') ] + [(r.id, r.name) for r in recipes]
+    # Map for slot index lookup in template (to get idx by (date, slot_label))
+    slot_index_map = {key: idx for idx, key in enumerate(slots)}
 
-    # existing entries
+    # Fetch recipes for dropdown
+    recipes = Recipe.query.filter_by(user_id=current_user.id).all()
+    recipe_choices = [(0, '-- Select --')] + [(r.id, r.name) for r in recipes] + [(-1, 'CUSTOM')]
+
+    # Existing entries keyed by (date, slot)
     existing = PlannerEntry.query.filter(
         PlannerEntry.user_id == current_user.id,
         PlannerEntry.date.in_(days)
     ).all()
-    existing_map = { (e.date, e.slot): e for e in existing }
+    existing_map = {(e.date, e.slot): e for e in existing}
 
-    # build form
+    # Create form
     form = PlannerForm()
+
+    # formdata for binding submitted data on POST
+    formdata = request.form if request.method == 'POST' else None
+
+    # Dynamically create subforms with prefixes and initial data or POST data
     for idx, (d, label) in enumerate(slots):
-        field = PlannerSlotForm(prefix=f'slot-{idx}')
-        field.recipe_id.choices = recipe_choices + [(-1, 'CUSTOM')]
+        prefix = f'slot-{idx}'
+        data = {}
         key = (d, label)
         if key in existing_map:
             e = existing_map[key]
             if e.recipe_id:
-                field.recipe_id.data = e.recipe_id
+                data['recipe_id'] = e.recipe_id
+                data['free_text'] = ''
             elif e.free_text:
-                field.recipe_id.data = -1
+                data['recipe_id'] = -1
+                data['free_text'] = e.free_text
             else:
-                field.recipe_id.data = 0
-            field.free_text.data = e.free_text
-        setattr(form, f'slot_{idx}', field)
+                data['recipe_id'] = 0
+                data['free_text'] = ''
+        else:
+            data['recipe_id'] = 0
+            data['free_text'] = ''
+
+        subform = PlannerSlotForm(formdata=formdata, prefix=prefix, data=data)
+        subform.recipe_id.choices = recipe_choices
+
+        setattr(form, f'slot_{idx}', subform)
 
     if form.validate_on_submit():
         for idx, (d, label) in enumerate(slots):
@@ -302,15 +317,12 @@ def planner():
             key = (d, label)
 
             if selected_id == -1:
-                # Custom input
                 r_id = None
                 text = fld.free_text.data.strip() if fld.free_text.data else None
             elif selected_id and selected_id > 0:
-                # Selected real recipe
                 r_id = selected_id
                 text = None
             else:
-                # Neither selected nor custom
                 r_id = None
                 text = None
 
@@ -328,5 +340,10 @@ def planner():
         flash("Planner saved!", "success")
         return redirect(url_for('main.planner'))
 
-    return render_template('planner.html', 
-        form=form, slots=slots, slots_by_day=slots_by_day, recipe_map={r.id:r for r in recipes})
+    return render_template('planner.html',
+                           form=form,
+                           slots=slots,
+                           slots_by_day=slots_by_day,
+                           recipe_map={r.id: r for r in recipes},
+                           slot_index_map=slot_index_map)
+
