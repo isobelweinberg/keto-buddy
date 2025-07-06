@@ -12,7 +12,14 @@
         <a href="{{ url_for('main.ingredients') }}">Ingredients</a>
         <a href="{{ url_for('main.recipes') }}">Recipes</a>
         <a href="{{ url_for('main.new_recipe') }}">Add Recipe</a>
-        <a href="{{ url_for('main.targets') }}">Daily targets</a>
+        <a href="{{ url_for('main.targets') }}">Daily Targets</a>
+        <a href=" {{ url_for('main.planner') }}">Meal Planner</a>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('main.login') }}">Login</a>
+            <a href="{{ url_for('main.signup') }}">Sign Up</a>
+        {% endif %}
     </div>
 
     <div class="main">

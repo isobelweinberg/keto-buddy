@@ -1,10 +1,10 @@
-from datetime import date
+from datetime import date, timedelta
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import db
-from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User
-from .forms import RecipeForm, TargetForm, LoginForm, RegistrationForm, IngredientForm
+from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User, PlannerEntry
+from .forms import RecipeForm, TargetForm, LoginForm, RegistrationForm, IngredientForm, PlannerForm, PlannerSlotForm
 
 main = Blueprint('main', __name__)
 
@@ -237,3 +237,87 @@ def signup():
         return redirect(url_for('main.login'))
 
     return render_template('signup.html', form=form)
+
+@main.route('/planner', methods=['GET','POST'])
+@login_required
+def planner():
+    today = date.today()
+    days = [today + timedelta(days=i) for i in range(10)]
+
+    # latest targets
+    tgt = Target.query.filter_by(user_id=current_user.id).order_by(Target.date.desc()).first()
+    if not tgt:
+        flash("Please set your daily targets first.", "warning")
+        return redirect(url_for('main.targets'))
+
+    # compute slots per day
+    slots = []
+    for d in days:
+        for m in range(1, tgt.num_main_meals + 1):
+            label = {1:'Breakfast',2:'Lunch',3:'Dinner'}.get(m, f'Meal {m}')
+            slots.append((d, label))
+        for s in range(1, tgt.num_snacks + 1):
+            slots.append((d, f'Snack {s}'))
+
+    # fetch recipes for dropdown
+    recipes = Recipe.query.filter_by(user_id=current_user.id).all()
+    recipe_choices = [ (0, '-- Select --') ] + [(r.id, r.name) for r in recipes]
+
+    # existing entries
+    existing = PlannerEntry.query.filter(
+        PlannerEntry.user_id == current_user.id,
+        PlannerEntry.date.in_(days)
+    ).all()
+    existing_map = { (e.date, e.slot): e for e in existing }
+
+    # build form
+    form = PlannerForm()
+    for idx, (d, label) in enumerate(slots):
+        field = PlannerSlotForm(prefix=f'slot-{idx}')
+        field.recipe_id.choices = recipe_choices + [(-1, 'CUSTOM')]
+        key = (d, label)
+        if key in existing_map:
+            e = existing_map[key]
+            if e.recipe_id:
+                field.recipe_id.data = e.recipe_id
+            elif e.free_text:
+                field.recipe_id.data = -1
+            else:
+                field.recipe_id.data = 0
+            field.free_text.data = e.free_text
+        setattr(form, f'slot_{idx}', field)
+
+    if form.validate_on_submit():
+        for idx, (d, label) in enumerate(slots):
+            fld = getattr(form, f'slot_{idx}')
+            selected_id = fld.recipe_id.data
+            key = (d, label)
+
+            if selected_id == -1:
+                # Custom input
+                r_id = None
+                text = fld.free_text.data.strip() if fld.free_text.data else None
+            elif selected_id and selected_id > 0:
+                # Selected real recipe
+                r_id = selected_id
+                text = None
+            else:
+                # Neither selected nor custom
+                r_id = None
+                text = None
+
+            entry = existing_map.get(key)
+            if entry:
+                entry.recipe_id = r_id
+                entry.free_text = text
+            else:
+                entry = PlannerEntry(user_id=current_user.id,
+                                     date=d, slot=label,
+                                     recipe_id=r_id, free_text=text)
+                db.session.add(entry)
+
+        db.session.commit()
+        flash("Planner saved!", "success")
+        return redirect(url_for('main.planner'))
+
+    return render_template('planner.html', form=form, slots=slots, recipe_map={r.id:r for r in recipes})

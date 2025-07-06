@@ -4,11 +4,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
-from dotenv import load_dotenv
 
 from config import Config
-
-load_dotenv()
 
 db = SQLAlchemy()
 csrf = CSRFProtect()
@@ -21,7 +18,6 @@ def create_app():
     app = Flask(__name__)
 
     app.config.from_object(Config)
-    app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
     
     db.init_app(app)
     csrf.init_app(app)

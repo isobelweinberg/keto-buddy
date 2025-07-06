@@ -114,3 +114,15 @@ form button:hover {
 h1, h2 {
     font-weight: 500;
 }
+
+.message-danger {
+  color: red;
+}
+
+.message-success {
+  color: green;
+}
+
+.message-default {
+  color: black;
+}

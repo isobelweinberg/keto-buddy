@@ -81,3 +81,12 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+class PlannerEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    slot = db.Column(db.String(20), nullable=False)   # eg 'Breakfast', 'Meal 4', 'Snack 2'
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=True)
+    free_text = db.Column(db.String(200), nullable=True)
+    recipe = db.relationship('Recipe')

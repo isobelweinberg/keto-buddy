@@ -14,9 +14,10 @@ x targets at meal level
 - add meal/snack targets to the create recipe page
 x username and password to select S's account
 - group a/b/c lookup tables or switched functionality or just simple calculator
+- add hospital recipe page, for entering total values manually
 - up or downvote recipes
 - static database insert files
-- make secret key called in config
+x make secret key called in config
 - prettify css
 x address DB secrets thing
 - deploy
@@ -25,3 +26,4 @@ x address DB secrets thing
 
 - add in planner with shopping list export
 - ingredient swapping
+- record keeping - percentage eaten, ketones
