@@ -18,7 +18,7 @@ x username and password to select S's account
 - up or downvote recipes
 - static database insert files
 x make secret key called in config
-- prettify css
+- prettify css + html
 x address DB secrets thing
 - deploy
 x repo

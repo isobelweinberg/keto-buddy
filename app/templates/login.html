@@ -4,29 +4,17 @@
 
 {% block content %}
     <h1>Login</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul>
-          {% for category, message in messages %}
-            <li style="color: {% if category == 'danger' %}red{% elif category == 'success' %}green{% else %}black{% endif %}">
-              {{ message }}
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-
     <form method="POST" action="{{ url_for('main.login') }}">
         {{ form.hidden_tag() }}
 
         <p>
             {{ form.childsname.label }}<br>
-            {{ form.childsname(size=32) }}
+            {{ form.childsname }}
         </p>
 
         <p>
             {{ form.password.label }}<br>
-            {{ form.password(size=32) }}
+            {{ form.password }}
         </p>
 
         <p>{{ form.submit() }}</p>
