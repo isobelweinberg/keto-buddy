@@ -3,11 +3,24 @@
 
 {% block content %}
 <h1>10‑Day Meal Log</h1>
+
 <form method="post">
   {{ form.csrf_token }}
 
   {% for date, slot_names in slots_by_day %}
     <h2>{{ date.strftime('%A %d/%m/%Y') }}</h2>
+    <div style="margin-bottom: 0.5em;">
+      <form method="post" style="display: inline;">
+        {{ form.csrf_token }}
+        <input type="hidden" name="date_str" value="{{ date.isoformat() }}">
+        <button name="action" value="add_meal">+ Add Extra Meal</button>
+      </form>
+      <form method="post" style="display: inline;">
+        {{ form.csrf_token }}
+        <input type="hidden" name="date_str" value="{{ date.isoformat() }}">
+        <button name="action" value="add_snack">+ Add Extra Snack</button>
+      </form>
+    </div>
     <table>
       <tr>
         <th>Meal</th>
@@ -42,7 +55,7 @@
     </table>
   {% endfor %}
 
-  {{ form.submit() }}
+  <p style="margin-top: 1em;">{{ form.submit() }}</p>
 </form>
 
 <script>
