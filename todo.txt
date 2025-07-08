@@ -21,8 +21,9 @@ x make secret key called in config
 - prettify css
 x address DB secrets thing
 - deploy
-- repo?
-- readme +/- license
+x repo
+- readme 
+- license?
 
 x add in planner with shopping list export
 - ingredient swapping

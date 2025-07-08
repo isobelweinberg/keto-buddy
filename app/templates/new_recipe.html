@@ -54,11 +54,14 @@
         <div class="ingredient-entry">
             {{ subform.ingredient_id.label }} {{ subform.ingredient_id() }}
             {{ subform.amount.label }} {{ subform.amount(step="0.1", value=subform.amount.data or '0') }}
-        </div>
             <button type="button" class="remove-ingredient" data-index="{{ loop.index0 }}">Remove</button>
+        </div>
         {% endfor %}
     </div>
+    <br>
     <button type="button" name="add_ingredient">Add Ingredient</button>
+    <br>
+    <br>
 
      <!-- Hidden template to clone -->
     <template id="ingredient-template">
@@ -78,8 +81,8 @@
     </template>
 
 
-    <h3>Nutrition Summary</h3>
-    <table border="1" id="nutrition-table">
+    <h2>Nutrition Summary</h2>
+    <table id="nutrition-table">
         <thead>
             <tr>
                 <th>Ingredient</th>

@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Keto Planner{% endblock %}</title>
+    <title>{% block title %}Keto Buddy{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="sidebar">
-        <h2>Keto Planner</h2>
+        <h2>Keto Buddy</h2>
         <a href="{{ url_for('main.index') }}">Home</a>
         <a href="{{ url_for('main.ingredients') }}">Ingredients</a>
         <a href="{{ url_for('main.recipes') }}">Recipes</a>
