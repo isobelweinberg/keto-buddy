@@ -74,7 +74,7 @@ table tr:hover {
 form {
     background-color: #E3F2FD;
     padding: 20px;
-    margin-top: 30px;
+    margin-top: 15px;
     border-radius: 6px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
@@ -86,7 +86,7 @@ form label {
     font-weight: 600;
 }
 
-form input, form select {
+form input, form select, form textarea {
     margin-top: 5px;
     margin-bottom: 0px;
     padding: 10px;
@@ -135,10 +135,23 @@ label.radio-inline {
     cursor: pointer;
     display: inline-flex;
     align-items: center;
+    white-space: nowrap;
+    font-weight: normal;
 }
 label.radio-inline input[type="radio"] {
     margin-right: 5px;
 }
+.ingredient-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* space between items */
+    margin-bottom: 5px;
+}
+
+.ingredient-entry label {
+    margin-right: 5px;
+}
+
 
 /* Message styles */
 .message-danger {
