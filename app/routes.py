@@ -378,53 +378,18 @@ def log():
     today = date.today()
     days = [today + timedelta(days=i) for i in range(10)]
 
-    # Fetch latest targets
     tgt = Target.query.filter_by(user_id=current_user.id).order_by(Target.date.desc()).first()
     if not tgt:
         flash("Please set your daily targets first.", "warning")
         return redirect(url_for('main.targets'))
 
-    # Fetch existing LogEntry for these days
     existing = LogEntry.query.filter(
         LogEntry.user_id == current_user.id,
         LogEntry.date.in_(days)
     ).all()
     existing_map = {(e.date, e.slot): e for e in existing}
 
-    # Handle "Add Extra Meal"/"Add Extra Snack" buttons
-    if request.method == 'POST':
-        action = request.form.get('action')
-        date_str = request.form.get('date_str')
-
-        if action in ('add_meal', 'add_snack') and date_str:
-            d = date.fromisoformat(date_str)
-
-            # Determine next available index
-            prefix = 'Extra Meal' if action == 'add_meal' else 'Extra Snack'
-            existing_slots = [
-                slot for (day, slot) in existing_map.keys()
-                if day == d and slot.startswith(prefix)
-            ]
-            next_idx = len(existing_slots) + 1
-            slot_label = f'{prefix} {next_idx}'
-
-            # Check if already exists
-            if (d, slot_label) not in existing_map:
-                new_entry = LogEntry(
-                    user_id=current_user.id,
-                    date=d,
-                    slot=slot_label,
-                    recipe_id=None,
-                    free_text=None,
-                    percent_eaten=100,
-                    notes=''
-                )
-                db.session.add(new_entry)
-                db.session.commit()
-
-            return redirect(url_for('main.log'))
-
-    # --- Compute default slots ---
+    # Compute default slots
     slots = []
     for d in days:
         for m in range(1, tgt.num_main_meals + 1):
@@ -433,23 +398,20 @@ def log():
         for s in range(1, tgt.num_snacks + 1):
             slots.append((d, f'Snack {s}'))
 
-    # --- Add all existing extra slots from DB ---
     for e in existing:
         if e.slot.startswith("Extra Meal") or e.slot.startswith("Extra Snack"):
             slots.append((e.date, e.slot))
 
-    # Group by date for display
     grouped_slots = defaultdict(list)
     for d, label in slots:
         grouped_slots[d].append(label)
     slots_by_day = sorted(grouped_slots.items())
     slot_index_map = {key: idx for idx, key in enumerate(slots)}
 
-    # Fetch user's recipes
+    # Recipes
     recipes = Recipe.query.filter_by(user_id=current_user.id).all()
     recipe_choices = [(0, '-- Select --')] + [(r.id, r.name) for r in recipes] + [(-1, 'CUSTOM')]
 
-    # Helper: get latest PlannerEntry
     def get_latest_planner_entry(user_id, date_, slot):
         return PlannerEntry.query.filter(
             PlannerEntry.user_id == user_id,
@@ -457,18 +419,15 @@ def log():
             PlannerEntry.date <= date_
         ).order_by(PlannerEntry.date.desc()).first()
 
-    # Form setup
+    # --- Handle form ---
     form = LogForm()
     formdata = request.form if request.method == 'POST' else None
 
     for idx, (d, label) in enumerate(slots):
         prefix = f'slot-{idx}'
-
-        # If form is being submitted, we load from formdata
         if formdata:
             subform = LogSlotForm(formdata=formdata, prefix=prefix)
         else:
-            # Load data from existing LogEntry or planner
             key = (d, label)
             data = {}
             if key in existing_map:
@@ -482,32 +441,51 @@ def log():
                 else:
                     data['recipe_id'] = 0
                     data['free_text'] = ''
-                data['percent_eaten'] = e.percent_eaten if e.percent_eaten is not None else 100
+                data['percent_eaten'] = e.percent_eaten or 100
                 data['notes'] = e.notes or ''
             else:
-                planner_entry = get_latest_planner_entry(current_user.id, d, label)
-                if planner_entry:
-                    if planner_entry.recipe_id:
-                        data['recipe_id'] = planner_entry.recipe_id
+                planner = get_latest_planner_entry(current_user.id, d, label)
+                if planner:
+                    if planner.recipe_id:
+                        data['recipe_id'] = planner.recipe_id
                         data['free_text'] = ''
-                    elif planner_entry.free_text:
+                    elif planner.free_text:
                         data['recipe_id'] = -1
-                        data['free_text'] = planner_entry.free_text
-                    else:
-                        data['recipe_id'] = 0
-                        data['free_text'] = ''
-                else:
-                    data['recipe_id'] = 0
-                    data['free_text'] = ''
+                        data['free_text'] = planner.free_text
                 data['percent_eaten'] = 100
                 data['notes'] = ''
-
             subform = LogSlotForm(prefix=prefix, data=data)
 
         subform.recipe_id.choices = recipe_choices
         setattr(form, f'slot_{idx}', subform)
 
-    # --- Handle submission ---
+    # --- Detect if "add_meal" or "add_snack" was clicked ---
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action:
+            if action.startswith('add_meal_') or action.startswith('add_snack_'):
+                date_str = action.split('_')[-1]
+                d = date.fromisoformat(date_str)
+                prefix = 'Extra Meal' if 'meal' in action else 'Extra Snack'
+                existing_slots = [slot for (day, slot) in existing_map if day == d and slot.startswith(prefix)]
+                next_idx = len(existing_slots) + 1
+                slot_label = f'{prefix} {next_idx}'
+
+                if (d, slot_label) not in existing_map:
+                    new_entry = LogEntry(
+                        user_id=current_user.id,
+                        date=d,
+                        slot=slot_label,
+                        recipe_id=None,
+                        free_text=None,
+                        percent_eaten=100,
+                        notes=''
+                    )
+                    db.session.add(new_entry)
+                    db.session.commit()
+                return redirect(url_for('main.log'))
+
+    # --- Handle normal form submission ---
     if form.validate_on_submit():
         for idx, (d, label) in enumerate(slots):
             fld = getattr(form, f'slot_{idx}')

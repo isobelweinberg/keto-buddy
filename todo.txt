@@ -26,5 +26,5 @@ x address DB secrets thing
 
 x add in planner with shopping list export
 - ingredient swapping
-- record keeping - percentage eaten
+x record keeping - percentage eaten
 - record keeping - ketones
