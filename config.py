@@ -14,6 +14,6 @@ class Config:
 
     SQLALCHEMY_DATABASE_URI = db_uri or 'sqlite:///' + os.path.join(basedir, 'keto.db')
 
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'keto.db')
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'keto.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
