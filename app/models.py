@@ -103,3 +103,13 @@ class LogEntry(db.Model):
     percent_eaten = db.Column(db.Float, nullable=True)   # 0-100%
     notes = db.Column(db.Text, nullable=True)
     recipe = db.relationship('Recipe')
+
+class KetoneLogEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    time = db.Column(db.Time, nullable=False)
+    ketone_level = db.Column(db.Float, nullable=True)  # mmol/L
+    glucose_level = db.Column(db.Float, nullable=True)  # optional, mmol/L
+
+    user = db.relationship('User', backref='ketone_logs')

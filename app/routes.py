@@ -1,13 +1,14 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from collections import defaultdict
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import db
-from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User, PlannerEntry, LogEntry
-from .forms import(
+from .models import (
+    Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User, PlannerEntry, LogEntry, KetoneLogEntry)
+from .forms import (
     RecipeForm, CalculatedRecipeForm, TargetForm, LoginForm, RegistrationForm, IngredientForm, PlannerForm, 
-    PlannerSlotForm, LogForm, LogSlotForm)
+    PlannerSlotForm, LogForm, LogSlotForm, KetoneEntryForm)
 from .seed_db import seed_ingredients
 
 main = Blueprint('main', __name__)
@@ -419,19 +420,6 @@ def planner():
                         if note:
                             ingredient_notes[key].add(note)
 
-    # Prepare a sorted list of ingredients for easier display
-    # shopping_list = sorted(
-    #     [
-    #         {
-    #             'name': name,
-    #             'units': units,
-    #             'amount': amount,
-    #             'notes': "; ".join(ingredient_notes[(name, units)]) if ingredient_notes[(name, units)] else None
-    #         }
-    #         for (name, units), amount in ingredient_totals.items()
-    #     ],
-    #     key=lambda x: x['name'].lower()
-    # )
     used_notes = set()
     shopping_list = []
 
@@ -470,13 +458,31 @@ def log():
         flash("Please set your daily targets first.", "warning")
         return redirect(url_for('main.targets'))
 
+    # Load existing LogEntry records for days
     existing = LogEntry.query.filter(
         LogEntry.user_id == current_user.id,
         LogEntry.date.in_(days)
     ).all()
     existing_map = {(e.date, e.slot): e for e in existing}
 
-    # Compute default slots
+    # Load existing KetoneLogEntry records for days
+    existing_ketones = KetoneLogEntry.query.filter(
+        KetoneLogEntry.user_id == current_user.id,
+        KetoneLogEntry.date.in_(days)
+    ).order_by(KetoneLogEntry.date, KetoneLogEntry.time).all()
+
+    # Group ketone entries by date for display
+    ketones_by_day = defaultdict(list)
+    for k in existing_ketones:
+        ketones_by_day[k.date].append(k)
+    print(f"Ketones by day existing: {ketones_by_day}")
+
+    # for day, ketone_list in ketones_by_day.items():
+    #     for ketone in ketone_list:
+    #         print(ketone.date)
+    #         print((type(ketone.time)))
+
+    # Compute default slots for meals/snacks
     slots = []
     for d in days:
         for m in range(1, tgt.num_main_meals + 1):
@@ -484,7 +490,9 @@ def log():
             slots.append((d, label))
         for s in range(1, tgt.num_snacks + 1):
             slots.append((d, f'Snack {s}'))
+    # print(f"Default slots: {slots}")
 
+    # Add any existing extra meal/snack slots
     for e in existing:
         if e.slot.startswith("Extra Meal") or e.slot.startswith("Extra Snack"):
             slots.append((e.date, e.slot))
@@ -495,7 +503,7 @@ def log():
     slots_by_day = sorted(grouped_slots.items())
     slot_index_map = {key: idx for idx, key in enumerate(slots)}
 
-    # Recipes
+    # Recipes for choices
     recipes = Recipe.query.filter_by(user_id=current_user.id).all()
     recipe_choices = [(0, '-- Select --')] + [(r.id, r.name) for r in recipes] + [(-1, 'CUSTOM')]
 
@@ -506,10 +514,12 @@ def log():
             PlannerEntry.date <= date_
         ).order_by(PlannerEntry.date.desc()).first()
 
-    # --- Handle form ---
+    # Instantiate meal log form
     form = LogForm()
     formdata = request.form if request.method == 'POST' else None
+    print(f"Form data: {formdata}")
 
+    # Create meal slot subforms dynamically
     for idx, (d, label) in enumerate(slots):
         prefix = f'slot-{idx}'
         if formdata:
@@ -546,7 +556,7 @@ def log():
         subform.recipe_id.choices = recipe_choices
         setattr(form, f'slot_{idx}', subform)
 
-    # --- Detect if "add_meal" or "add_snack" was clicked ---
+    # On POST: handle adding extra meal/snack button clicks
     if request.method == 'POST':
         action = request.form.get('action')
         if action:
@@ -572,54 +582,144 @@ def log():
                     db.session.commit()
                 return redirect(url_for('main.log'))
 
-    # --- Handle normal form submission ---
-    if form.validate_on_submit():
-        for idx, (d, label) in enumerate(slots):
-            fld = getattr(form, f'slot_{idx}')
-            selected_id = fld.recipe_id.data
-            key = (d, label)
+        # Handle "Save Log" submission including ketones
+        print("Got to save log")
+        print(f"Form errors: {form.errors}")
+        print(f"Request method: {request.method}")
+        print(f"Form is submitted: {form.is_submitted()}")
+        print(f"Request form data: {request.form}")
+        print("Manual validation:", form.validate())
 
-            if selected_id == -1:
-                r_id = -1
-                text = fld.free_text.data.strip() if fld.free_text.data else None
-            elif selected_id and selected_id > 0:
-                r_id = selected_id
-                text = None
-            else:
-                r_id = None
-                text = None
+        from flask_wtf.csrf import CSRFError
+        try:
+            valid = form.validate()
+        except CSRFError as e:
+            print("CSRF validation error:", e.description)
+            valid = False
+        print("Form validate() result:", valid)
+        print("Form errors:", form.errors)
 
-            percent = fld.percent_eaten.data if fld.percent_eaten.data is not None else 100
-            notes = fld.notes.data.strip() if fld.notes.data else None
+        if form.validate_on_submit():
+            print(f"form data 2: {formdata}")
+            print(f"form ketone entries: {form.ketone_entries.entries}")
+            # Save meal log entries
+            for idx, (d, label) in enumerate(slots):
+                fld = getattr(form, f'slot_{idx}')
+                selected_id = fld.recipe_id.data
+                key = (d, label)
 
-            entry = existing_map.get(key)
-            if entry:
-                entry.recipe_id = r_id
-                entry.free_text = text
-                entry.percent_eaten = percent
-                entry.notes = notes
-            else:
-                entry = LogEntry(
+                if selected_id == -1:
+                    r_id = -1
+                    text = fld.free_text.data.strip() if fld.free_text.data else None
+                elif selected_id and selected_id > 0:
+                    r_id = selected_id
+                    text = None
+                else:
+                    r_id = None
+                    text = None
+
+                percent = fld.percent_eaten.data if fld.percent_eaten.data is not None else 100
+                notes = fld.notes.data.strip() if fld.notes.data else None
+
+                entry = existing_map.get(key)
+                if entry:
+                    entry.recipe_id = r_id
+                    entry.free_text = text
+                    entry.percent_eaten = percent
+                    entry.notes = notes
+                else:
+                    entry = LogEntry(
+                        user_id=current_user.id,
+                        date=d,
+                        slot=label,
+                        recipe_id=r_id,
+                        free_text=text,
+                        percent_eaten=percent,
+                        notes=notes
+                    )
+                    db.session.add(entry)
+
+            ketone_entries = []
+            for entry in form.ketone_entries.entries:
+                d = date.fromisoformat(entry.form.date.data)
+                t = entry.form.time.data
+
+                ketones = entry.form.ketone_level.data
+                glucose = entry.form.glucose_level.data
+
+                if ketones is None and glucose is None:
+                    continue
+
+                ketone_entries.append((d, t, ketones, glucose))
+
+
+            print(f"ketone_entries: {ketone_entries}")
+
+            # Save ketone log entries, overwrinting existing ones that have the same date and time
+            for d, t, ketones, glucose in ketone_entries:
+                existing_entry = KetoneLogEntry.query.filter_by(
                     user_id=current_user.id,
                     date=d,
-                    slot=label,
-                    recipe_id=r_id,
-                    free_text=text,
-                    percent_eaten=percent,
-                    notes=notes
-                )
-                db.session.add(entry)
+                    time=t
+                ).first()
+                print(f"Existing entry: {existing_entry}")
+                if ketones is None and glucose is None:
+                    continue
+                if existing_entry:
+                    existing_entry.ketone_level = ketones
+                    existing_entry.glucose_level = glucose
+                else:
+                    new_k = KetoneLogEntry(
+                        user_id=current_user.id,
+                        date=d,
+                        time=t,
+                        ketone_level=ketones,
+                        glucose_level=glucose
+                    )
+                    db.session.add(new_k)
 
-        db.session.commit()
-        flash("Log saved!", "success")
-        return redirect(url_for('main.log'))
+            # Handle deletion of ketone entries not submitted in the form (due to the remove button)
+            submitted_pairs = set()
+            idx = 0
+
+            # Collect all (date, time) pairs submitted
+            while True:
+                date_key = f'ketone_entries-{idx}-date'
+                time_key = f'ketone_entries-{idx}-time'
+                if date_key not in request.form or time_key not in request.form:
+                    break
+
+                date_str = request.form.get(date_key)
+                time_str = request.form.get(time_key)
+                if not (date_str and time_str):
+                    idx += 1
+                    continue
+
+                date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+                time_obj = datetime.strptime(time_str, '%H:%M').time()
+                submitted_pairs.add((date_obj, time_obj))
+
+                idx += 1
+
+            # Now fetch all existing entries for the user
+            existing_entries = KetoneLogEntry.query.filter_by(user_id=current_user.id).all()
+
+            # Delete any existing entries NOT in submitted form
+            for entry in existing_entries:
+                if (entry.date, entry.time) not in submitted_pairs:
+                    db.session.delete(entry)
+
+            db.session.commit()
+            flash("Log saved!", "success")
+            return redirect(url_for('main.log'))
 
     return render_template('log.html',
                            form=form,
                            slots=slots,
                            slots_by_day=slots_by_day,
                            recipe_map={r.id: r for r in recipes},
-                           slot_index_map=slot_index_map)
+                           slot_index_map=slot_index_map,
+                           ketones_by_day=ketones_by_day)
 
 @main.route('/fruit_substitutions', methods=['GET'])
 @login_required

@@ -7,7 +7,7 @@ engine = create_engine('sqlite:///keto.db')
 metadata = MetaData()
 
 # Reflect the recipes table from the database
-chosen_table = Table('planner_entry', metadata, autoload_with=engine)
+chosen_table = Table('ketone_log_entry', metadata, autoload_with=engine)
 
 # Drop the recipes table
 chosen_table.drop(engine)

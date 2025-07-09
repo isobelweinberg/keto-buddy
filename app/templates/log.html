@@ -7,6 +7,9 @@
 <form method="post">
   {{ form.csrf_token }}
 
+  {% set ns = namespace(ketone_entry_counter = 0) %}
+  <!-- {% set ketone_entry_counter = 0 %} -->
+
   {% for date, slot_names in slots_by_day %}
     <h2>{{ date.strftime('%A %d/%m/%Y') }}</h2>
     <div style="margin-bottom: 0.5em;">
@@ -36,7 +39,7 @@
             <br />
             <input type="text" name="{{ fld.free_text.name }}" id="custom_{{ idx }}" size="20"
                    value="{{ fld.free_text.data or '' }}"
-                   style="display: {% if fld.recipe_id.data == -1 %}inline{% else %}none{% endif %}; margin-top: 4px;" />
+                   style="display: {% if fld.recipe_id.data == -1 %}'inline'{% else %}'none'{% endif %}; margin-top: 4px;" />
           </td>
           <td>
             {{ fld.percent_eaten(size=4, min=0, max=100, step=1) }} %
@@ -47,6 +50,51 @@
         </tr>
       {% endfor %}
     </table>
+<table id="ketone_table_{{ loop.index0 }}">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Ketones (mmol/L)</th>
+      <th>Glucose (mmol/L)</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <!-- {% set ketone_entries = ketones_by_day.get(date, []) %}
+  {% if ketone_entries %}
+    <ul>
+      {% for entry in ketone_entries %}
+        <li>{{ entry.time }} - {{ entry.ketone_level }} mmol/L ketones, {{ entry.glucose_level }} mmol/L glucose</li>
+      {% endfor %}
+    </ul>
+  {% endif %} -->
+
+  <tbody>
+    {% set ketone_entries = ketones_by_day.get(date, []) %}
+    {% for ketone_entry in ketone_entries %}
+      <tr>
+        <td>
+        <input type="time" name="ketone_entries-{{ ns.ketone_entry_counter }}-time"
+                  value="{{ ketone_entry.time.strftime('%H:%M') }}">
+        </td>
+        <td>
+          <input type="number" step="0.1" min="0" name="ketone_entries-{{ ns.ketone_entry_counter }}-ketone_level"
+                value="{{ ketone_entry.ketone_level }}">
+        </td>
+        <td>
+          <input type="number" step="0.1" min="0" name="ketone_entries-{{ ns.ketone_entry_counter }}-glucose_level"
+                value="{{ ketone_entry.glucose_level }}">
+        </td>
+        <td><button type="button" class="remove-row-btn">Remove</button></td>
+        <input type="hidden" name="ketone_entries-{{ ns.ketone_entry_counter }}-date" value="{{ date.isoformat() }}">
+        <input type="hidden" name="ketone_entries-{{ ns.ketone_entry_counter }}-id" value="{{ ketone_entry.id }}">
+      </tr>
+      {% set ns.ketone_entry_counter = ns.ketone_entry_counter + 1 %}
+    {% endfor %}
+  </tbody>
+</table>
+<button type="button" onclick="addKetoneRow({{ loop.index0 }}, '{{ date.isoformat() }}');">Add further ketones</button>
+
   {% endfor %}
 
   <p style="margin-top: 1em;">{{ form.submit() }}</p>
@@ -63,5 +111,28 @@ function handleRecipeChange(idx) {
     customInput.value = '';
   }
 }
+let ketoneEntryCounter = {{ ns.ketone_entry_counter }};
+
+function addKetoneRow(dayIndex, dateIso) {
+  const tableBody = document.querySelector(`#ketone_table_${dayIndex} tbody`);
+
+  const newRow = document.createElement('tr');
+  newRow.innerHTML = `
+    <td><input type="time" name="ketone_entries-${ketoneEntryCounter}-time"></td>
+    <td><input type="number" step="0.1" min="0" name="ketone_entries-${ketoneEntryCounter}-ketone_level"></td>
+    <td><input type="number" step="0.1" min="0" name="ketone_entries-${ketoneEntryCounter}-glucose_level"></td>
+    <td><button type="button" class="remove-row-btn">Remove</button></td>
+    <input type="hidden" name="ketone_entries-${ketoneEntryCounter}-date" value="${dateIso}">
+    <input type="hidden" name="ketone_entries-${ketoneEntryCounter}-id" value="${ketoneEntryCounter}">
+  `;
+  tableBody.appendChild(newRow);
+  ketoneEntryCounter++;
+}
+
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('remove-row-btn')) {
+    e.target.closest('tr').remove();
+  }
+});
 </script>
 {% endblock %}

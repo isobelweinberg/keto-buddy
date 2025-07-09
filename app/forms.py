@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import (StringField, TextAreaField, FloatField, SelectField, FieldList, FormField, SubmitField, 
-    DecimalField, IntegerField, PasswordField, EmailField, RadioField)
+    DecimalField, IntegerField, PasswordField, EmailField, RadioField, TimeField, HiddenField)
 from wtforms.validators import DataRequired, NumberRange, Optional, Email, EqualTo, ValidationError
 
 from .models import Ingredient, User
@@ -142,6 +142,13 @@ class LogSlotForm(FlaskForm):
     percent_eaten = FloatField('% eaten', default=100)
     notes = TextAreaField('Notes', render_kw={"rows":2, "cols":30})
 
+class KetoneEntryForm(FlaskForm):
+    date = HiddenField('Date')  # store date as ISO string
+    time = TimeField('Time')
+    ketone_level = FloatField('Ketones (mmol/L)', validators=[Optional()])
+    glucose_level = FloatField('Glucose (mmol/L)', validators=[Optional()])
+
 class LogForm(FlaskForm):
     submit = SubmitField('Save Log')
     # slot_N will be added dynamically in the view
+    ketone_entries = FieldList(FormField(KetoneEntryForm), min_entries=0)

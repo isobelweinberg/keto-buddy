@@ -18,7 +18,11 @@ x ingredient swapping
 x fix jinja errors
 x add hospital recipe page, for entering total values manually
 x static database insert files
-- record keeping - ketones
+x record keeping - ketones
+x fix lack of ketone display
+x fix overwriting in DB
+- fix not showing 2 empty
+x remove button - get rid?
 x make secret key called in config
 x prettify css + html
 x address DB secrets thing
