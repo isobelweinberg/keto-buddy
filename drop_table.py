@@ -7,9 +7,9 @@ engine = create_engine('sqlite:///keto.db')
 metadata = MetaData()
 
 # Reflect the recipes table from the database
-recipes_table = Table('recipe', metadata, autoload_with=engine)
+chosen_table = Table('planner_entry', metadata, autoload_with=engine)
 
 # Drop the recipes table
-recipes_table.drop(engine)
+chosen_table.drop(engine)
 
-print("Dropped the 'recipes' table.")
+print(f"Dropped the {chosen_table.name} table.")

@@ -13,6 +13,7 @@
         <th>Meal</th>
         <th>Recipe</th>
         <th>Ingredients</th>
+        <th>Notes</th>
       </tr>
       {% for slot in slot_names %}
         {% set idx = slot_index_map[(date, slot)] %}
@@ -42,6 +43,8 @@
                 </div>
             {% endif %}
           </td>
+          <td>
+            {{ fld.notes }}
         </tr>
       {% endfor %}
     </table>

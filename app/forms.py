@@ -131,6 +131,7 @@ class RegistrationForm(FlaskForm):
 class PlannerSlotForm(FlaskForm):
     recipe_id = SelectField('Recipe', coerce=int, validators=[Optional()])
     free_text = StringField('Or enter custom', validators=[Optional()])
+    notes = TextAreaField('Notes', render_kw={"rows":2, "cols":30}, validators=[Optional()])
 
 class PlannerForm(FlaskForm):
     submit = SubmitField('Save Planner')

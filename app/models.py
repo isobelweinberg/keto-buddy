@@ -91,6 +91,7 @@ class PlannerEntry(db.Model):
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=True)
     free_text = db.Column(db.String(200), nullable=True)
     recipe = db.relationship('Recipe')
+    notes = db.Column(db.Text, nullable=True)  # notes for the planner entry
 
 class LogEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
