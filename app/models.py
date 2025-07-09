@@ -7,7 +7,7 @@ from . import db
 
 class Ingredient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     name = db.Column(db.String(80), unique=True, nullable=False)
     type = db.Column(db.String(20), nullable=False)  # e.g. fat, protein, carb
     units = db.Column(db.String(10), nullable=False)  # g or ml
@@ -20,7 +20,7 @@ class Ingredient(db.Model):
 
 class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     name = db.Column(db.String(120), nullable=False)
     total_fat = db.Column(db.Float, nullable=True)
     total_carbs = db.Column(db.Float, nullable=True)
@@ -49,7 +49,7 @@ class RecipeIngredient(db.Model):
 
 class Target(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     ratio = db.Column(db.Numeric(4, 2), nullable=False)  # up to 2 decimal places
     calories = db.Column(db.Float, nullable=False)
     fat = db.Column(db.Float, nullable=False)
@@ -62,7 +62,7 @@ class Target(db.Model):
 
 class TargetBreakdown(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     item = db.Column(db.String(20), nullable=False)  # e.g. 'Meal' or 'Snack'
     calories = db.Column(db.Float, nullable=False)
     fat = db.Column(db.Float, nullable=False)
@@ -85,7 +85,7 @@ class Users(db.Model, UserMixin):
 
 class PlannerEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     slot = db.Column(db.String(20), nullable=False)   # eg 'Breakfast', 'Meal 4', 'Snack 2'
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=True)
@@ -95,7 +95,7 @@ class PlannerEntry(db.Model):
 
 class LogEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     slot = db.Column(db.String(20), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id'), nullable=True)
@@ -106,7 +106,7 @@ class LogEntry(db.Model):
 
 class KetoneLogEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
     ketone_level = db.Column(db.Float, nullable=True)  # mmol/L
