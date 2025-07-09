@@ -121,8 +121,10 @@ def new_recipe():
 
         flash('Recipe created successfully!', 'success')
         return redirect(url_for('main.recipes'))
+    
+    latest_target = Target.query.order_by(Target.date.desc(), Target.id.desc()).first()
 
-    return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data)
+    return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data, target=latest_target)
 
 @main.route('/recipes')
 @login_required

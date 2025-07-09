@@ -51,29 +51,27 @@
     {{ form.hidden_tag() }}
 
     <!-- Main target inputs -->
-    <p>{{ form.ratio.label }}<br>{{ form.ratio(size=10) }}</p>
-    <p>{{ form.calories.label }}<br>{{ form.calories(size=10) }}</p>
-    <p>{{ form.fat.label }}<br>{{ form.fat(size=10) }}</p>
-    <p>{{ form.protein.label }}<br>{{ form.protein(size=10) }}</p>
-    <p>{{ form.carbs.label }}<br>{{ form.carbs(size=10) }}</p>
-    <p>{{ form.num_main_meals.label }}<br>{{ form.num_main_meals(size=10) }}</p>
-    <p>{{ form.num_snacks.label }}<br>{{ form.num_snacks(size=10) }}</p>
-
-    <hr>
+    <p>{{ form.ratio.label }}{{ form.ratio(size=10) }}</p>
+    <p>{{ form.calories.label }}{{ form.calories(size=10) }}</p>
+    <p>{{ form.fat.label }}{{ form.fat(size=10) }}</p>
+    <p>{{ form.protein.label }}{{ form.protein(size=10) }}</p>
+    <p>{{ form.carbs.label }}{{ form.carbs(size=10) }}</p>
+    <p>{{ form.num_main_meals.label }}{{ form.num_main_meals(size=10) }}</p>
+    <p>{{ form.num_snacks.label }}{{ form.num_snacks(size=10) }}</p>
 
     <!-- Optional breakdown for Meal -->
     <h3>Meal Breakdown (optional)</h3>
-    <p>{{ form.meal_calories.label }}<br>{{ form.meal_calories(size=10) }}</p>
-    <p>{{ form.meal_fat.label }}<br>{{ form.meal_fat(size=10) }}</p>
-    <p>{{ form.meal_protein.label }}<br>{{ form.meal_protein(size=10) }}</p>
-    <p>{{ form.meal_carbs.label }}<br>{{ form.meal_carbs(size=10) }}</p>
+    <p>{{ form.meal_calories.label }}{{ form.meal_calories(size=10) }}</p>
+    <p>{{ form.meal_fat.label }}{{ form.meal_fat(size=10) }}</p>
+    <p>{{ form.meal_protein.label }}{{ form.meal_protein(size=10) }}</p>
+    <p>{{ form.meal_carbs.label }}{{ form.meal_carbs(size=10) }}</p>
 
     <!-- Optional breakdown for Snack -->
     <h3>Snack Breakdown (optional)</h3>
-    <p>{{ form.snack_calories.label }}<br>{{ form.snack_calories(size=10) }}</p>
-    <p>{{ form.snack_fat.label }}<br>{{ form.snack_fat(size=10) }}</p>
-    <p>{{ form.snack_protein.label }}<br>{{ form.snack_protein(size=10) }}</p>
-    <p>{{ form.snack_carbs.label }}<br>{{ form.snack_carbs(size=10) }}</p>
+    <p>{{ form.snack_calories.label }}{{ form.snack_calories(size=10) }}</p>
+    <p>{{ form.snack_fat.label }}{{ form.snack_fat(size=10) }}</p>
+    <p>{{ form.snack_protein.label }}{{ form.snack_protein(size=10) }}</p>
+    <p>{{ form.snack_carbs.label }}{{ form.snack_carbs(size=10) }}</p>
 
     <p>{{ form.submit() }}</p>
 </form>

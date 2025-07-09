@@ -11,7 +11,7 @@ x fix missing ratios - they are mostly null
 x fix undefined in recipes page
 x add in current targets page (table with dates so can update them)
 x targets at meal level 
-- add meal/snack targets to the create recipe page
+x add meal/snack targets to the create recipe page
 x username and password to select S's account
 - group a/b/c lookup tables or switched functionality or just simple calculator
 - add hospital recipe page, for entering total values manually
@@ -24,8 +24,8 @@ x address DB secrets thing
 x repo
 x readme 
 - license?
-
 x add in planner with shopping list export
 - ingredient swapping
 x record keeping - percentage eaten
 - record keeping - ketones
+- add emergency protocol page

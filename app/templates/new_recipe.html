@@ -117,6 +117,18 @@
             </tr>
         </tfoot>
     </table>
+    {% if target %}
+        {% if target.breakdowns %}
+        <div class="target-display">
+                {% for b in target.breakdowns %}
+                    <br>
+                    <span class = "highlight">
+                        <strong>{{ b.item }} target</strong>: {{ b.calories }} cal, {{ b.fat }} g fat, {{ b.protein }} g protein, {{ b.carbs }} g carbs
+                    </span>
+                {% endfor %}
+        {% endif %}
+    {% endif %}
+    </p>
 
     <p>{{ form.submit() }}</p>
 </form>

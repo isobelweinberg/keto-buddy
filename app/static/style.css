@@ -171,7 +171,16 @@ label.radio-inline input[type="radio"] {
     flex-shrink: 0;
 }
 
+.target-display {
+    color: #006064;
+    line-height: 1.8;
+}
 
+.highlight {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
+    padding: 3px 3px;
+}
 
 
 /* Message styles */
