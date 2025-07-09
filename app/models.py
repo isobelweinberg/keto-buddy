@@ -72,6 +72,7 @@ class TargetBreakdown(db.Model):
     target_id = db.Column(db.Integer, db.ForeignKey('target.id'), nullable=True)
 
 class Users(db.Model, UserMixin):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     childsname = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
