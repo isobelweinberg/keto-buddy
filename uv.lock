@@ -249,8 +249,8 @@ wheels = [
 ]
 
 [[package]]
-name = "keto-planner"
-version = "0.1.0"
+name = "keto-buddy"
+version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "dotenv" },
