@@ -44,7 +44,7 @@
             {% endif %}
           </td>
           <td>
-            {{ fld.notes }}
+            {{ fld.notes(placeholder="Include fruit/vegetable choices or other notes") }}
         </tr>
       {% endfor %}
     </table>
@@ -60,6 +60,7 @@
       <tr>
         <th>Ingredient</th>
         <th>Total Amount</th>
+        <th>Fruit/veg Choices</th>
       </tr>
     </thead>
     <tbody>
@@ -67,6 +68,7 @@
         <tr>
           <td>{{ item.name }}</td>
           <td>{{ "%.2f"|format(item.amount) }} {{ item.units }}</td>
+          <td>{{ item.notes }} </td>
         </tr>
       {% endfor %}
     </tbody>

@@ -14,7 +14,7 @@ x targets at meal level
 x add meal/snack targets to the create recipe page
 x username and password to select S's account
 x group a/b/c lookup tables or switched functionality or just simple calculator
-- ingredient swapping
+x ingredient swapping
 - fix jinja errors
 - date selection
 x add hospital recipe page, for entering total values manually

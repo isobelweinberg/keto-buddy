@@ -354,9 +354,11 @@ def planner():
             else:
                 data['recipe_id'] = 0
                 data['free_text'] = ''
+            data['notes'] = e.notes if e.notes else ''
         else:
             data['recipe_id'] = 0
             data['free_text'] = ''
+            data['notes'] = ''
 
         subform = PlannerSlotForm(formdata=formdata, prefix=prefix, data=data)
         subform.recipe_id.choices = recipe_choices
@@ -378,15 +380,18 @@ def planner():
             else:
                 r_id = None
                 text = None
+            
+            notes = fld.notes.data.strip() if fld.notes.data else None
 
             entry = existing_map.get(key)
             if entry:
                 entry.recipe_id = r_id
                 entry.free_text = text
+                entry.notes = notes
             else:
                 entry = PlannerEntry(user_id=current_user.id,
                                      date=d, slot=label,
-                                     recipe_id=r_id, free_text=text)
+                                     recipe_id=r_id, free_text=text, notes=notes)
                 db.session.add(entry)
 
         db.session.commit()
@@ -395,24 +400,55 @@ def planner():
     
     # Aggregate ingredients for all selected (non-custom) recipes in the form
     ingredient_totals = defaultdict(float)  # key: (ingredient_name, units), value: total_amount
+    ingredient_notes = defaultdict(set)    # key: (ingredient_name, units), value: list of notes
 
     for idx, (d, label) in enumerate(slots):
         fld = getattr(form, f'slot_{idx}')
         selected_id = fld.recipe_id.data
 
-    # Only aggregate if selected recipe is valid and not custom or empty
+        # Only aggregate if selected recipe is valid and not custom or empty
         if selected_id and selected_id > 0:
             recipe = next((r for r in recipes if r.id == selected_id), None)
             if recipe:
                 for ri in recipe.ingredients:
                     key = (ri.ingredient.name, ri.ingredient.units)
                     ingredient_totals[key] += ri.amount
+                    # If unmeasured, collect the slot's notes field
+                    if ri.ingredient.unmeasured_ingredient:
+                        note = fld.notes.data.strip() if fld.notes.data else None
+                        if note:
+                            ingredient_notes[key].add(note)
 
     # Prepare a sorted list of ingredients for easier display
-    shopping_list = sorted(
-        [{'name': name, 'units': units, 'amount': amount} for (name, units), amount in ingredient_totals.items()],
-        key=lambda x: x['name'].lower()
-    )
+    # shopping_list = sorted(
+    #     [
+    #         {
+    #             'name': name,
+    #             'units': units,
+    #             'amount': amount,
+    #             'notes': "; ".join(ingredient_notes[(name, units)]) if ingredient_notes[(name, units)] else None
+    #         }
+    #         for (name, units), amount in ingredient_totals.items()
+    #     ],
+    #     key=lambda x: x['name'].lower()
+    # )
+    used_notes = set()
+    shopping_list = []
+
+    for (name, units), amount in sorted(ingredient_totals.items(), key=lambda x: x[0][0].lower()):
+        notes_for_ingredient = []
+
+        for note in sorted(ingredient_notes[(name, units)]):
+            if note not in used_notes:
+                notes_for_ingredient.append(note)
+                used_notes.add(note)
+
+        shopping_list.append({
+            'name': name,
+            'units': units,
+            'amount': amount,
+            'notes': "; ".join(notes_for_ingredient) if notes_for_ingredient else None
+        })
 
     return render_template('planner.html',
                            form=form,
