@@ -59,6 +59,35 @@ class RecipeForm(FlaskForm):
         for ingredient_form in self.ingredients:
             ingredient_form.ingredient_id.choices = choices
 
+class CalculatedRecipeForm(FlaskForm):
+    name = StringField('Recipe Name', validators=[DataRequired()])
+    notes = TextAreaField('Notes')
+    author = SelectField('Author', choices=[
+        ('', '-- Select author --'),
+        ('hospital', 'Hospital'),
+        ('home', 'Home')
+    ], validators=[DataRequired(message="Please select an author.")])
+    meal_type = SelectField('Meal Type', choices=[
+        ('breakfast', 'Breakfast'),
+        ('lunch', 'Lunch'),
+        ('dinner', 'Dinner'),
+        ('snack', 'Snack'),
+    ])
+    ingredients = FieldList(FormField(RecipeIngredientForm), min_entries=1)
+    
+    total_fat = FloatField('Total Fat (g)', validators=[DataRequired()])
+    total_carbs = FloatField('Total Carbs (g)', validators=[DataRequired()])
+    total_protein = FloatField('Total Protein (g)', validators=[DataRequired()])
+    total_calories = FloatField('Total Calories', validators=[DataRequired()])
+    ratio = FloatField('Ketogenic Ratio', validators=[Optional()])
+    
+    submit = SubmitField('Create Recipe')
+
+    def set_ingredient_choices(self):
+        choices = [(ing.id, ing.name) for ing in Ingredient.query.order_by(Ingredient.name).all()]
+        for entry in self.ingredients.entries:
+            entry.form.ingredient_id.choices = choices
+
 class TargetForm(FlaskForm):
     ratio = DecimalField('Ratio', places=2, validators=[DataRequired()])
     calories = FloatField('Calories', validators=[DataRequired()])

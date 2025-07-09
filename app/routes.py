@@ -6,8 +6,8 @@ from flask_login import login_user, logout_user, login_required, current_user
 from . import db
 from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User, PlannerEntry, LogEntry
 from .forms import(
-    RecipeForm, TargetForm, LoginForm, RegistrationForm, IngredientForm, PlannerForm, PlannerSlotForm, 
-    LogForm, LogSlotForm)
+    RecipeForm, CalculatedRecipeForm, TargetForm, LoginForm, RegistrationForm, IngredientForm, PlannerForm, 
+    PlannerSlotForm, LogForm, LogSlotForm)
 
 main = Blueprint('main', __name__)
 
@@ -125,6 +125,50 @@ def new_recipe():
     latest_target = Target.query.order_by(Target.date.desc(), Target.id.desc()).first()
 
     return render_template('new_recipe.html', form=form, nutrition_data=nutrition_data, target=latest_target)
+
+@main.route('/recipes/new_calculated', methods=['GET', 'POST'])
+@login_required
+def new_calculated_recipe():
+    form = CalculatedRecipeForm()
+    form.set_ingredient_choices()
+
+    if form.validate_on_submit():
+        recipe = Recipe(
+            name=form.name.data,
+            author=form.author.data,
+            meal_type=form.meal_type.data,
+            notes=form.notes.data,
+            user_id=current_user.id,
+            total_fat=form.total_fat.data,
+            total_carbs=form.total_carbs.data,
+            total_protein=form.total_protein.data,
+            total_calories=form.total_calories.data,
+            ratio=form.ratio.data if form.ratio.data else (
+                form.total_fat.data / (form.total_carbs.data + form.total_protein.data)
+                if (form.total_carbs.data + form.total_protein.data) > 0 else None
+            )
+        )
+
+        for ingredient_form in form.ingredients.entries:
+            ingredient_id = ingredient_form.ingredient_id.data
+            amount = ingredient_form.amount.data
+            if ingredient_id and amount:
+                ri = RecipeIngredient(
+                    ingredient_id=ingredient_id,
+                    amount=amount,
+                    fat=None,
+                    carbs=None,
+                    protein=None,
+                    calories=None
+                )
+                recipe.ingredients.append(ri)
+
+        db.session.add(recipe)
+        db.session.commit()
+        flash('Calculated Recipe created successfully!', 'success')
+        return redirect(url_for('main.recipes'))
+
+    return render_template('new_calculated_recipe.html', form=form)
 
 @main.route('/recipes')
 @login_required
