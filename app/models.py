@@ -112,4 +112,4 @@ class KetoneLogEntry(db.Model):
     ketone_level = db.Column(db.Float, nullable=True)  # mmol/L
     glucose_level = db.Column(db.Float, nullable=True)  # optional, mmol/L
 
-    user = db.relationship('User', backref='ketone_logs')
+    user = db.relationship('Users', backref='ketone_logs')
