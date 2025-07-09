@@ -15,17 +15,19 @@ x add meal/snack targets to the create recipe page
 x username and password to select S's account
 - group a/b/c lookup tables or switched functionality or just simple calculator
 - add hospital recipe page, for entering total values manually
-- up or downvote recipes
 - static database insert files
 - ingredient swapping
 - record keeping - ketones
-- add emergency protocol page
 x make secret key called in config
 x prettify css + html
 x address DB secrets thing
 - deploy
 x repo
 x readme 
-- license?
 x add in planner with shopping list export
 x record keeping - percentage eaten
+
+version 2:
+- up or downvote recipes
+- add emergency protocol page
+- license?

@@ -4,85 +4,17 @@
 
 <form method="POST" action="{{ url_for('main.new_calculated_recipe') }}">
     {% include "_recipe_form.html" %}
-    <!-- {{ form.hidden_tag() }}
 
-    {% if form.errors %}
-    <div class="alert alert-danger">
-        <ul>
-        {% for field, errors in form.errors.items() %}
-            {% for error in errors %}
-                <li>{{ field }}: {{ error }}</li>
-            {% endfor %}
-        {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
-
-    <p>{{ form.name.label }} {{ form.name(size=40) }}</p>
-    <p>{{ form.notes.label }} {{ form.notes(rows=4) }}</p>
-    <p>{{ form.author.label }} {{ form.author(class_="form-control") }}</p>
-    <p>{{ form.meal_type.label }} {{ form.meal_type(class_="form-control") }}</p>
-
-    <h2>Ingredients</h2>
-    <div id="ingredients-list">
-        {% for subform in form.ingredients %}
-            <div class="ingredient-entry">
-                {{ subform.ingredient_id.label }} {{ subform.ingredient_id() }}
-                {{ subform.amount.label }} {{ subform.amount(step="0.1") }}
-                <button type="button" class="remove-ingredient">Remove</button>
-            </div>
-        {% endfor %}
-    </div>
-    <button type="button" id="add-ingredient">Add Ingredient</button> -->
-
-    <br><br>
     <h2>Manual Nutrition Entry</h2>
     <p>{{ form.total_fat.label }} {{ form.total_fat(step="0.1") }}</p>
     <p>{{ form.total_carbs.label }} {{ form.total_carbs(step="0.1") }}</p>
     <p>{{ form.total_protein.label }} {{ form.total_protein(step="0.1") }}</p>
     <p>{{ form.total_calories.label }} {{ form.total_calories(step="1") }}</p>
-    <p>{{ form.ratio.label }} {{ form.ratio(step="0.01") }} <small>(Leave blank to auto-calculate)</small></p>
+    <p>{{ form.ratio.label }} {{ form.ratio(step="0.01") }}</p>
 
     <p>{{ form.submit() }}</p>
 </form>
 
-
-
-<!--
-<script>
-    
-document.getElementById('add-ingredient').addEventListener('click', function() {
-    const list = document.getElementById('ingredients-list');
-    const count = list.children.length;
-    const newEntry = document.createElement('div');
-    newEntry.classList.add('ingredient-entry');
-
-    newEntry.innerHTML = `
-        <label for="ingredients-${count}-ingredient_id">Ingredient</label>
-        <select name="ingredients-${count}-ingredient_id" id="ingredients-${count}-ingredient_id">
-            {% for value, label in form.ingredients[0].ingredient_id.choices %}
-                <option value="{{ value }}">{{ label }}</option>
-            {% endfor %}
-        </select>
-        <label for="ingredients-${count}-amount">Amount</label>
-        <input type="number" name="ingredients-${count}-amount" id="ingredients-${count}-amount" step="0.1" value="0">
-        <button type="button" class="remove-ingredient">Remove</button>
-    `;
-
-    list.appendChild(newEntry);
-
-    newEntry.querySelector('.remove-ingredient').addEventListener('click', (e) => {
-        e.target.closest('.ingredient-entry').remove();
-    });
-});
-
-document.querySelectorAll('.remove-ingredient').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.target.closest('.ingredient-entry').remove();
-    });
-});
-
-</script> -->
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {

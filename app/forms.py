@@ -68,18 +68,18 @@ class CalculatedRecipeForm(FlaskForm):
         ('home', 'Home')
     ], validators=[DataRequired(message="Please select an author.")])
     meal_type = SelectField('Meal Type', choices=[
+        ('', '-- Select meal type --'),
         ('breakfast', 'Breakfast'),
-        ('lunch', 'Lunch'),
-        ('dinner', 'Dinner'),
-        ('snack', 'Snack'),
-    ])
+        ('main', 'Main'),
+        ('snack', 'Snack')
+    ], validators=[DataRequired(message="Please select a meal type.")])
     ingredients = FieldList(FormField(RecipeIngredientForm), min_entries=1)
     
     total_fat = FloatField('Total Fat (g)', validators=[DataRequired()])
     total_carbs = FloatField('Total Carbs (g)', validators=[DataRequired()])
     total_protein = FloatField('Total Protein (g)', validators=[DataRequired()])
     total_calories = FloatField('Total Calories', validators=[DataRequired()])
-    ratio = FloatField('Ketogenic Ratio', validators=[Optional()])
+    ratio = FloatField('Ketogenic Ratio', validators=[DataRequired()])
     
     submit = SubmitField('Create Recipe')
 
