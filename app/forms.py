@@ -144,7 +144,7 @@ class LogSlotForm(FlaskForm):
 
 class KetoneEntryForm(FlaskForm):
     date = HiddenField('Date')  # store date as ISO string
-    time = TimeField('Time')
+    time = TimeField('Time', validators=[Optional()])
     ketone_level = FloatField('Ketones (mmol/L)', validators=[Optional()])
     glucose_level = FloatField('Glucose (mmol/L)', validators=[Optional()])
 

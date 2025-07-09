@@ -589,6 +589,8 @@ def log():
         print(f"Form is submitted: {form.is_submitted()}")
         print(f"Request form data: {request.form}")
         print("Manual validation:", form.validate())
+        # for ketone_entry in form.ketone_entries:
+        #     print(f"Ketone entry data: {ketone_entry.form.data}")
 
         from flask_wtf.csrf import CSRFError
         try:
@@ -598,6 +600,9 @@ def log():
             valid = False
         print("Form validate() result:", valid)
         print("Form errors:", form.errors)
+
+        for i in range(10):
+            print(request.form.get(f'ketone_entries-{i}-time'))
 
         if form.validate_on_submit():
             print(f"form data 2: {formdata}")
