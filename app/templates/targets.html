@@ -7,29 +7,44 @@
 
 {% if target %}
     <div class="target-display">
-        <p><strong>Date:</strong> {{ target.date }}</p>
-        <p><strong>Ratio:</strong> {{ target.ratio }}</p>
-        <p><strong>Calories:</strong> {{ target.calories }}</p>
-        <p><strong>Fat:</strong> {{ target.fat }}</p>
-        <p><strong>Protein:</strong> {{ target.protein }}</p>
-        <p><strong>Carbs:</strong> {{ target.carbs }}</p>
-        <p><strong>Main meals:</strong> {{ target.num_main_meals }}</p>
-        <p><strong>Snacks:</strong> {{ target.num_snacks }}</p>
+        <table>
+            <tr>
+                <th>Date target set</th>
+                <th>Ratio</th>
+                <th>Calories</th>
+                <th>Fat</th>
+                <th>Protein</th>
+                <th>Carbs</th>
+                <th>Main Meals</th>
+                <th>Snacks</th>
+                {% if target.breakdowns %}
+                    {% for b in target.breakdowns %}
+                        <th>
+                            {{ b.item }} breakdown
+                        </th>
+                    {% endfor %}
+                {% endif %}
+            </tr>
+            <tr>
+                <td>{{ target.date.strftime('%d/%m/%Y') }}</td>
+                <td>{{ target.ratio }}</td>
+                <td>{{ target.calories }}</td>
+                <td>{{ target.fat }}</td>
+                <td>{{ target.protein }}</td>
+                <td>{{ target.carbs }}</td>
+                <td>{{ target.num_main_meals }}</td>
+                <td>{{ target.num_snacks }}</td>
+                {% if target.breakdowns %}
+                    {% for b in target.breakdowns %}
+                        <td>{{ b.calories }} kcal, {{ b.fat }}f / {{ b.protein }}p / {{ b.carbs }}c</td>
+                    {% endfor %}
+                {% endif %}
+            </tr>
+        </table>
     </div>
 {% else %}
     <p>No targets set yet.</p>
 {% endif %}
-
-{% if target.breakdowns %}
-    <h3>Breakdown</h3>
-    <ul>
-        {% for b in target.breakdowns %}
-            <li><strong>{{ b.item }}</strong>: {{ b.calories }} kcal, {{ b.fat }}f / {{ b.protein }}p / {{ b.carbs }}c</li>
-        {% endfor %}
-    </ul>
-{% endif %}
-
-<hr>
 
 <h2>Update Targets</h2>
 <form method="POST">
