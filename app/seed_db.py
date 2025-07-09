@@ -9,6 +9,7 @@ def seed_ingredients(user_id):
             'type': 'vegetables',
             'units': 'g',
             'unmeasured_ingredient': True,
+            'source': 'Hospital',
         },
         {
             'user_id': user_id,
@@ -16,6 +17,7 @@ def seed_ingredients(user_id):
             'type': 'vegetables',
             'units': 'g',
             'unmeasured_ingredient': True,
+            'source': 'Hospital',
         },
         {
             'user_id': user_id,
@@ -23,6 +25,7 @@ def seed_ingredients(user_id):
             'type': 'vegetables',
             'units': 'g',
             'unmeasured_ingredient': True,
+            'source': 'Hospital',
         },
         {
             'user_id': user_id,
@@ -30,6 +33,7 @@ def seed_ingredients(user_id):
             'type': 'fruit',
             'units': 'g',
             'unmeasured_ingredient': True,
+            'source': 'Hospital',
         },
         {
             'user_id': user_id,
@@ -37,6 +41,7 @@ def seed_ingredients(user_id):
             'type': 'fruit',
             'units': 'g',
             'unmeasured_ingredient': True,
+            'source': 'Hospital',
         },
         {
             'user_id': user_id,
@@ -44,6 +49,7 @@ def seed_ingredients(user_id):
             'type': 'fruit',
             'units': 'g',
             'unmeasured_ingredient': True,
+            'source': 'Hospital',
         },
     ]
 

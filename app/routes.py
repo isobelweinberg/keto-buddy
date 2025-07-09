@@ -584,3 +584,13 @@ def log():
                            slots_by_day=slots_by_day,
                            recipe_map={r.id: r for r in recipes},
                            slot_index_map=slot_index_map)
+
+@main.route('/fruit_substitutions', methods=['GET'])
+@login_required
+def fruit_substitutions():
+    return render_template('fruit_substitutions.html')
+
+@main.route('/veg_substitutions', methods=['GET'])
+@login_required
+def veg_substitutions():
+    return render_template('veg_substitutions.html')

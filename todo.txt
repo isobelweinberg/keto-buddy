@@ -13,7 +13,7 @@ x add in current targets page (table with dates so can update them)
 x targets at meal level 
 x add meal/snack targets to the create recipe page
 x username and password to select S's account
-- group a/b/c lookup tables or switched functionality or just simple calculator
+x group a/b/c lookup tables or switched functionality or just simple calculator
 - ingredient swapping
 x add hospital recipe page, for entering total values manually
 x static database insert files
