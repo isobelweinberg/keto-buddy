@@ -15,7 +15,8 @@ class Ingredient(db.Model):
     percent_carbs = db.Column(db.Float)
     percent_protein = db.Column(db.Float)
     total_calories = db.Column(db.Float)
-    source = db.Column(db.String(150))  # New field for source info
+    source = db.Column(db.String(150))
+    unmeasured_ingredient = db.Column(db.Boolean, default=False)
 
 class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)

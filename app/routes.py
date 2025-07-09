@@ -8,6 +8,7 @@ from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdow
 from .forms import(
     RecipeForm, CalculatedRecipeForm, TargetForm, LoginForm, RegistrationForm, IngredientForm, PlannerForm, 
     PlannerSlotForm, LogForm, LogSlotForm)
+from .seed_db import seed_ingredients
 
 main = Blueprint('main', __name__)
 
@@ -22,7 +23,7 @@ def index():
 @main.route('/ingredients', methods=['GET'])
 @login_required
 def ingredients():
-    all_ingredients = Ingredient.query.all()
+    all_ingredients = Ingredient.query.filter_by(unmeasured_ingredient=False).all()
     form = IngredientForm()
     return render_template('ingredients.html', ingredients=all_ingredients, form=form)
 
@@ -41,6 +42,7 @@ def add_ingredient():
             total_calories=form.total_calories.data,
             source=form.source.data,
             user_id=current_user.id,
+            unmeasured_ingredient=False,
         )
         db.session.add(new_ingredient)
         db.session.commit()
@@ -282,6 +284,9 @@ def signup():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
+
+        seed_ingredients(user.id)
+
         flash('Registration successful! You can now log in.', 'success')
         return redirect(url_for('main.login'))
 

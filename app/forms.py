@@ -51,7 +51,7 @@ class RecipeForm(FlaskForm):
     submit = SubmitField('Save Recipe')
     
     def set_ingredient_choices(self):
-        ingredients = Ingredient.query.order_by(Ingredient.name).all()
+        ingredients = Ingredient.query.filter_by(unmeasured_ingredient=False).order_by(Ingredient.name).all()
         choices = [
             (ing.id, f"{ing.name} ({ing.source})" if ing.source else ing.name)
             for ing in ingredients

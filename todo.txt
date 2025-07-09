@@ -14,9 +14,10 @@ x targets at meal level
 x add meal/snack targets to the create recipe page
 x username and password to select S's account
 - group a/b/c lookup tables or switched functionality or just simple calculator
-- add hospital recipe page, for entering total values manually
-- static database insert files
 - ingredient swapping
+x add hospital recipe page, for entering total values manually
+x static database insert files
+
 - record keeping - ketones
 x make secret key called in config
 x prettify css + html
@@ -31,3 +32,6 @@ version 2:
 - up or downvote recipes
 - add emergency protocol page
 - license?
+
+version 3:
+- scraping tesco website
