@@ -51,12 +51,16 @@
     <h2>Ingredients</h2>
     <div id="ingredients-list">
         {% for subform in form.ingredients %}
-        <div class="ingredient-entry">
-            {{ subform.ingredient_id.label }} {{ subform.ingredient_id() }}
-            {{ subform.amount.label }} {{ subform.amount(step="0.1", value=subform.amount.data or '0') }}
-            <button type="button" class="remove-ingredient" data-index="{{ loop.index0 }}">Remove</button>
-        </div>
-        {% endfor %}
+            <div class="ingredient-entry">
+                <label for="{{ subform.ingredient_id.id }}">Ingredient</label>
+                    {{ subform.ingredient_id(class="ingredient-select") }}
+                <label for="{{ subform.amount.id }}">Amount</label>
+                    {{ subform.amount(class="ingredient-amount", step="0.1", value=subform.amount.data or '0') }}
+
+                <button type="button" class="remove-ingredient" data-index="{{ loop.index0 }}">Remove</button>
+            </div>
+            {% endfor %}
+
     </div>
     <br>
     <button type="button" name="add_ingredient">Add Ingredient</button>
@@ -67,14 +71,16 @@
     <template id="ingredient-template">
     <div class="ingredient-entry">
         <label for="ingredients-__index__-ingredient_id">Ingredient</label>
-        <select name="ingredients-__index__-ingredient_id" id="ingredients-__index__-ingredient_id">
+        <select name="ingredients-__index__-ingredient_id" id="ingredients-__index__-ingredient_id" 
+            class="ingredient-select">
         {% for value, label in form.ingredients[0].ingredient_id.choices %}
         <option value="{{ value }}">{{ label }}</option>
         {% endfor %}
         </select>
 
         <label for="ingredients-__index__-amount">Amount</label>
-        <input type="number" name="ingredients-__index__-amount" id="ingredients-__index__-amount" step="0.1" value="0">
+        <input type="number" name="ingredients-__index__-amount" id="ingredients-__index__-amount" 
+            class="ingredient-amount" step="0.1" value="0">
 
         <button type="button" class="remove-ingredient">Remove</button>
     </div>

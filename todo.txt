@@ -22,7 +22,7 @@ x make secret key called in config
 x address DB secrets thing
 - deploy
 x repo
-- readme 
+x readme 
 - license?
 
 x add in planner with shopping list export
