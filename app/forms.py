@@ -3,7 +3,7 @@ from wtforms import (StringField, TextAreaField, FloatField, SelectField, FieldL
     DecimalField, IntegerField, PasswordField, EmailField, RadioField, TimeField, HiddenField)
 from wtforms.validators import DataRequired, NumberRange, Optional, Email, EqualTo, ValidationError
 
-from .models import Ingredient, User
+from .models import Ingredient, Users
 
 class RecipeIngredientForm(FlaskForm):
     ingredient_id = SelectField('Ingredient', coerce=int, validators=[DataRequired()])
@@ -124,7 +124,7 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Sign Up')
 
     def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
+        user = Users.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('Email is already registered.')
         

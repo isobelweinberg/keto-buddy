@@ -5,10 +5,10 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import db
 from .models import (
-    Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User, PlannerEntry, LogEntry, KetoneLogEntry)
+    Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, Users, PlannerEntry, LogEntry, KetoneLogEntry)
 from .forms import (
     RecipeForm, CalculatedRecipeForm, TargetForm, LoginForm, RegistrationForm, IngredientForm, PlannerForm, 
-    PlannerSlotForm, LogForm, LogSlotForm, KetoneEntryForm)
+    PlannerSlotForm, LogForm, LogSlotForm)
 from .seed_db import seed_ingredients
 
 main = Blueprint('main', __name__)
@@ -253,7 +253,7 @@ def login():
         childsname = form.childsname.data
         password = form.password.data
         
-        user = User.query.filter_by(childsname=childsname).first()
+        user = Users.query.filter_by(childsname=childsname).first()
         if user and user.check_password(password):
             login_user(user)
             flash('Logged in successfully.', 'success')
@@ -278,7 +278,7 @@ def signup():
 
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(
+        user = Users(
             childsname=form.childsname.data,
             email=form.email.data,
         )

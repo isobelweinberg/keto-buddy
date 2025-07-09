@@ -71,7 +71,7 @@ class TargetBreakdown(db.Model):
     date = db.Column(db.Date, nullable=False, default=date.today)
     target_id = db.Column(db.Integer, db.ForeignKey('target.id'), nullable=True)
 
-class User(db.Model, UserMixin):
+class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     childsname = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
