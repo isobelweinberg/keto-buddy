@@ -15,11 +15,9 @@ x add meal/snack targets to the create recipe page
 x username and password to select S's account
 x group a/b/c lookup tables or switched functionality or just simple calculator
 x ingredient swapping
-- fix jinja errors
-- date selection
+x fix jinja errors
 x add hospital recipe page, for entering total values manually
 x static database insert files
-
 - record keeping - ketones
 x make secret key called in config
 x prettify css + html
@@ -31,6 +29,7 @@ x add in planner with shopping list export
 x record keeping - percentage eaten
 
 version 2:
+- date selection
 - up or downvote recipes
 - add emergency protocol page
 - license?
