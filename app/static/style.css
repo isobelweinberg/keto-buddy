@@ -101,7 +101,7 @@ form input, form select, form textarea {
     box-sizing: border-box;
 }
 
-form button {
+form button, form input[type="submit"] {
     margin-top: 5px;
     padding: 10px 16px;
     background-color: #1565C0;
@@ -114,7 +114,8 @@ form button {
     transition: background 0.2s;
 }
 
-form button:hover {
+form button:hover,
+form input[type="submit"]:hover {
     background-color: #D32F2F;
 }
 
