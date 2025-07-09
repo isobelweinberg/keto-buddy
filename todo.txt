@@ -17,15 +17,15 @@ x username and password to select S's account
 - add hospital recipe page, for entering total values manually
 - up or downvote recipes
 - static database insert files
+- ingredient swapping
+- record keeping - ketones
+- add emergency protocol page
 x make secret key called in config
-- prettify css + html
+x prettify css + html
 x address DB secrets thing
 - deploy
 x repo
 x readme 
 - license?
 x add in planner with shopping list export
-- ingredient swapping
 x record keeping - percentage eaten
-- record keeping - ketones
-- add emergency protocol page

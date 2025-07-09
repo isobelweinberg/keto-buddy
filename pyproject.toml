@@ -1,5 +1,5 @@
 [project]
-name = "keto-planner"
+name = "keto-buddy"
 version = "0.1.0"
 description = "Local Flask app to plan ketogenic meals for a child with epilepsy"
 dependencies = [

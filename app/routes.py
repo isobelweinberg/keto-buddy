@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from collections import defaultdict
 
-from flask import Blueprint, render_template, request, redirect, session, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import db
 from .models import Ingredient, Recipe, RecipeIngredient, Target, TargetBreakdown, User, PlannerEntry, LogEntry
