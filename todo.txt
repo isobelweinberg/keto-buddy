@@ -26,17 +26,29 @@ x remove button - get rid?
 x make secret key called in config
 x prettify css + html
 x address DB secrets thing
-- deploy
+x deploy
 x repo
 x readme 
 x add in planner with shopping list export
 x record keeping - percentage eaten
 
+version 1.1:
+- favicon
+- bug fix: not allowed 0 for entries in ingredients
+- in the recipe page, need to see units of thing you're adding
+- switch the order of carbs and protein on the calculated recipes page
+- delete ingredients feature (keep archived for affected recipes) / edit ingredients
+- on create recipes page, targets should be in same order as table above
+- delete recipe page (again, keep archived) / edit recipes
+- ingredients page - order alphabetically
+- on planner page, ingredients should show instantly
+- fewer boxes on planner page
+- switch order of glucose and ketones
+- CSV export
+
 version 2:
 - date selection
-- up or downvote recipes
 - add emergency protocol page
 - license?
 
-version 3:
-- scraping tesco website
+- responsive design?
