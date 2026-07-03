@@ -10,19 +10,22 @@ Features:
 
 Screenshots:
 
-![Screenshot of homepage](screenshots\screenshot1.png)
-![Ingredients page](screenshots\screenshot2.png)
-![Recipes page](screenshots\screenshot3.png)
-![Create new recipe page](screenshots\screenshot4.png)
-![Create new recipe 2](screenshots\screenshot4b.png)
-![Calculated recipes page](screenshots\screenshot5.png)
-![Daily targets](screenshots\screenshot6.png)
-![10-Day Planner](screenshots\screenshot7.png)
-![10-Day Meal Log](screenshots\screenshot8.png)
-![Fruits page](screenshots\screenshot9.png)
-![Fruits page](screenshots\screenshot10.png)
-![Vegetables page](screenshots\screenshot11.png)
-![Vegetables page](screenshots\screenshot12.png)
-![Logout page](screenshots\screenshot13.png)
+![Screenshot of homepage](screenshots/screenshot1.png)
+![Ingredients page](screenshots/screenshot2.png)
+![Recipes page](screenshots/screenshot3.png)
+![Create new recipe page](screenshots/screenshot4.png)
+![Create new recipe 2](screenshots/screenshot4b.png)
+![Calculated recipes page](screenshots/screenshot5.png)
+![Daily targets](screenshots/screenshot6.png)
+![10-Day Planner](screenshots/screenshot7.png)
+![10-Day Meal Log](screenshots/screenshot8.png)
+![Fruits page](screenshots/screenshot9.png)
+![Fruits page](screenshots/screenshot10.png)
+![Vegetables page](screenshots/screenshot11.png)
+![Vegetables page](screenshots/screenshot12.png)
+![Logout page](screenshots/screenshot13.png)
+
+Backend:
+- Javascript, Flask, SQLAlchemy
 
 Some vibe coding was used in this project!
