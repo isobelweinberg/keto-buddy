@@ -1,3 +1,5 @@
+# Use to drop tables as a one-off during local debugging
+
 from sqlalchemy import create_engine, MetaData, Table
 
 # Create the engine to connect to keto.db
