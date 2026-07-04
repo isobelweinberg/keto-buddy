@@ -2,4 +2,6 @@ __pycache__
 .venv
 keto.db
 .env
+
+# Recipes we created on the website have been saved to here
 /remote_db_copy
